@@ -192,33 +192,35 @@
       el('clearBtn').addEventListener('click', clearAll);
     }
 
-    // ===== Advanced markers =====
-    function makeDot(color, size, border=2){
-      const d = document.createElement('div');
-      d.style.width = d.style.height = `${size}px`;
-      d.style.borderRadius = '9999px';
-      d.style.background = color;
-      d.style.border = `${border}px solid white`;
-      d.style.boxShadow = '0 2px 8px rgba(0,0,0,.25)';
-      return d;
-    }
+    
+    // ===== Classic markers (no Map ID needed) =====
+function iconCircle(color, scale, stroke=2) {
+  return {
+    path: google.maps.SymbolPath.CIRCLE,
+    scale,
+    fillColor: color,
+    fillOpacity: 1,
+    strokeWeight: stroke,
+    strokeColor: '#ffffff'
+  };
+}
 
-    function setMarker(kind, latLng){
-      const { AdvancedMarkerElement } = google.maps.marker;
-      if (kind === 'origin') {
-        if (originMarker) originMarker.map = null;
-        originMarker = new AdvancedMarkerElement({ map, position: latLng, content: makeDot('#34d399', 18, 3), title: 'Origin' });
-      } else {
-        if (destMarker) destMarker.map = null;
-        destMarker = new AdvancedMarkerElement({ map, position: latLng, content: makeDot('#fbbf24', 18, 3), title: 'Destination' });
-      }
-    }
+function setMarker(kind, latLng){
+  const color = kind === 'origin' ? '#34d399' : '#fbbf24';
+  if (kind === 'origin') {
+    if (originMarker) originMarker.setMap(null);
+    originMarker = new google.maps.Marker({ map, position: latLng, icon: iconCircle(color, 10, 3), title: kind });
+  } else {
+    if (destMarker) destMarker.setMap(null);
+    destMarker = new google.maps.Marker({ map, position: latLng, icon: iconCircle(color, 10, 3), title: kind });
+  }
+}
 
-    function addStationMarker(position, isOriginSide){
-      const { AdvancedMarkerElement } = google.maps.marker;
-      const m = new AdvancedMarkerElement({ map, position, content: makeDot(isOriginSide ? '#06b6d4' : '#f59e0b', 14, 2) });
-      stationMarkers.push(m);
-    }
+function addStationMarker(position, isOriginSide){
+  const color = isOriginSide ? '#06b6d4' : '#f59e0b';
+  const m = new google.maps.Marker({ map, position, icon: iconCircle(color, 6, 2) });
+  stationMarkers.push(m);
+}
 
     // ===== Geolocation helper =====
     function useGeolocation(){

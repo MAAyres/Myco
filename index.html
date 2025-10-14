@@ -211,7 +211,7 @@
     // ===== Serverless fetchers =====
     async function fetchDirections({ origin, destination, mode, transitModes }){
       const params = new URLSearchParams({ origin, destination, mode });
-      if (mode === 'TRANSIT' && transitModes?.length) params.set('transitModes', transitModes.join(','));
+      if (mode === 'TRANSIT' && transitModes?.length) params.set('transitModes', transitModes.join('|'));
       const r = await fetch(`/api/directions?${params.toString()}`);
       const json = await r.json();
       if (!r.ok || json.status && json.status !== 'OK') {

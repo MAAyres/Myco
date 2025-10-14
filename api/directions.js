@@ -1,20 +1,25 @@
+// /api/directions.js  (Node runtime on Vercel)
 export default async function handler(req, res) {
   try {
     const { origin, destination, mode = "bicycling", transitModes = "" } = req.query || {};
     if (!origin || !destination) {
       return res.status(400).json({ status: "REQUEST_DENIED", error_message: "Missing origin/destination" });
     }
+
     const key = process.env.GOOGLE_SERVER_KEY;
     if (!key) {
       return res.status(500).json({ status: "REQUEST_DENIED", error_message: "GOOGLE_SERVER_KEY not set" });
     }
 
+    // Normalize transit modes: accept commas/pipes/spaces -> pipes (what Google expects)
+    let tm = String(transitModes || "").toLowerCase().split(/[,\s|]+/).filter(Boolean).join("|");
+
     const url = new URL("https://maps.googleapis.com/maps/api/directions/json");
     url.searchParams.set("origin", origin);
     url.searchParams.set("destination", destination);
     url.searchParams.set("mode", String(mode).toLowerCase());
-    if (String(mode).toLowerCase() === "transit" && transitModes) {
-      url.searchParams.set("transit_mode", String(transitModes).toLowerCase());
+    if (String(mode).toLowerCase() === "transit" && tm) {
+      url.searchParams.set("transit_mode", tm); // e.g. subway|train|tram|bus
     }
     url.searchParams.set("key", key);
 

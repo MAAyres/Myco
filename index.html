@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Myco — Cycle + TfL Planner (Google Maps + Serverless)</title>
+  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -84,7 +85,7 @@
       </div>
       <div class="flex items-start gap-3 p-3 rounded-full border border-white/60 glass">
         <input id="strictCap" type="checkbox" class="h-5 w-5 rounded-full mt-0.5"/>
-        <div class="text-sm">Strict cycling cap — ignore bike-only if over the cap.</div>
+        <div class="text-sm">Strict cycling cap — ignore bike‑only if over the cap.</div>
       </div>
       <div class="grid grid-cols-2 gap-2">
         <button id="planBtn" class="btn btn-primary">🚀 Find route</button>
@@ -141,9 +142,8 @@
     (async function bootstrap(){
       try {
         const env = await fetch('/api/env').then(r=>r.json()).catch(()=>({ mapsJsKey:null }));
-        let key = env.mapsJsKey || null;
-        if (!key) { key = prompt('Enter Google Maps JavaScript API key (render-only)') || ''; }
-        if (!key) { msg('Please supply a Maps key.'); return; }
+        const key = env.mapsJsKey || null;
+        if (!key) { msg('Maps key not configured. Set NEXT_PUBLIC_MAPS_JS_KEY in Vercel and redeploy.'); return; }
         await loadGoogleMaps(key);
         initAfterMapsLoad();
       } catch (e) { msg('Failed to load Maps: '+ e.message); }
@@ -213,27 +213,33 @@
       const params = new URLSearchParams({ origin, destination, mode });
       if (mode === 'TRANSIT' && transitModes?.length) params.set('transitModes', transitModes.join(','));
       const r = await fetch(`/api/directions?${params.toString()}`);
-      if (!r.ok) throw new Error('Directions error');
-      return r.json(); // Google Directions REST JSON
+      const json = await r.json();
+      if (!r.ok || json.status && json.status !== 'OK') {
+        const em = json.error_message || json.status || 'Directions error';
+        throw new Error(em);
+      }
+      return json; // Google Directions REST JSON
     }
 
     async function fetchNearbyStations({ lat, lng, radius }){
-      // Call Places Nearby twice: subway_station + train_station
       const q1 = new URLSearchParams({ lat, lng, radius: String(radius), type: 'subway_station' }).toString();
       const q2 = new URLSearchParams({ lat, lng, radius: String(radius), type: 'train_station' }).toString();
-      const [a, b] = await Promise.all([
-        fetch(`/api/places-nearby?${q1}`).then(r=>r.json()),
-        fetch(`/api/places-nearby?${q2}`).then(r=>r.json())
+      const [aRes, bRes] = await Promise.all([
+        fetch(`/api/places-nearby?${q1}`),
+        fetch(`/api/places-nearby?${q2}`)
       ]);
+      const a = await aRes.json(); const b = await bRes.json();
+      if ((!aRes.ok || a.status && a.status!=='OK') && (!bRes.ok || b.status && b.status!=='OK')) {
+        const em = a?.error_message || b?.error_message || 'Places nearby error';
+        throw new Error(em);
+      }
       const take = (json) => (json.results||[]).map(p => ({
         id: p.place_id,
         name: p.name,
         location: new google.maps.LatLng(p.geometry.location.lat, p.geometry.location.lng)
       }));
-      // dedupe by place_id
       const all = [...take(a), ...take(b)];
       const dedup = Object.values(all.reduce((acc, s)=>{ acc[s.id]=s; return acc; }, {}));
-      // sort by distance to (lat,lng)
       const base = new google.maps.LatLng(lat, lng);
       dedup.sort((x,y)=> google.maps.geometry.spherical.computeDistanceBetween(x.location, base) - google.maps.geometry.spherical.computeDistanceBetween(y.location, base));
       return dedup.slice(0,6);
@@ -253,37 +259,36 @@
 
       const originLL = originPlace.geometry.location; const destLL = destPlace.geometry.location;
 
-      const [originStations, destStations] = await Promise.all([
-        fetchNearbyStations({ lat: originLL.lat(), lng: originLL.lng(), radius: maxCycleMeters }),
-        fetchNearbyStations({ lat: destLL.lat(), lng: destLL.lng(), radius: maxCycleMeters })
-      ]);
+      let originStations = [], destStations = [];
+      try {
+        [originStations, destStations] = await Promise.all([
+          fetchNearbyStations({ lat: originLL.lat(), lng: originLL.lng(), radius: maxCycleMeters }),
+          fetchNearbyStations({ lat: destLL.lat(), lng: destLL.lng(), radius: maxCycleMeters })
+        ]);
+      } catch (e) {
+        msg('Places error: ' + e.message);
+      }
 
-      // draw stations
       [...originStations,...destStations].forEach((s,idx)=>{
         const m = new google.maps.Marker({ position: s.location, map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 6, fillColor: idx < originStations.length ? '#06b6d4' : '#f59e0b', fillOpacity: 1, strokeColor: 'white', strokeWeight: 2 }, title: s.name });
         stationMarkers.push(m);
       });
 
       const candidates = [];
-
-      // Helper to stringify coords
       const str = (ll) => `${ll.lat()},${ll.lng()}`;
 
-      // Bike-only
       try {
         const bikeOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'BICYCLING' });
         const tBike = sumDurationREST(bikeOD);
         const allowBikeOnly = !strictCap || (tBike <= maxCycleMin*60);
         if (allowBikeOnly) candidates.push({ kind:'bike-only', totalSec:tBike, segments:[{ mode:'BICYCLING', res: bikeOD }] });
-      } catch {}
+      } catch (e) { console.warn('Bike-only failed:', e.message); }
 
-      // Transit-only
       try {
         const trOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'TRANSIT', transitModes:['SUBWAY','TRAIN','TRAM','BUS'] });
         candidates.push({ kind:'transit-only', totalSec: sumDurationREST(trOD), segments:[{ mode:'TRANSIT', res: trOD }] });
-      } catch {}
+      } catch (e) { console.warn('Transit-only failed:', e.message); }
 
-      // Combos
       for (const a of originStations){
         for (const b of destStations){
           try {
@@ -293,11 +298,11 @@
             const t1=sumDurationREST(seg1), t2=sumDurationREST(seg2), t3=sumDurationREST(seg3);
             if (t1>maxCycleMin*60 || t3>maxCycleMin*60) continue;
             candidates.push({ kind:'combo', totalSec:t1+t2+t3, parts:{a,b}, segments:[{mode:'BICYCLING',res:seg1},{mode:'TRANSIT',res:seg2},{mode:'BICYCLING',res:seg3}] });
-          } catch {}
+          } catch (e) { /* skip bad pair */ }
         }
       }
 
-      if (!candidates.length){ msg('No routes found. Try increasing cycling time.'); return; }
+      if (!candidates.length){ msg('No routes found. Check that billing is enabled and both APIs are allowed on GOOGLE_SERVER_KEY.'); return; }
       candidates.sort((x,y)=>x.totalSec-y.totalSec);
       const best = candidates[0];
       renderSolution(best);
@@ -305,7 +310,11 @@
     }
 
     function sumDurationREST(json){
-      try { return json.routes[0].legs.reduce((acc,leg)=>acc+(leg.duration?.value||0),0); } catch { return Infinity; }
+      try {
+        if (json.status && json.status !== 'OK') return Infinity;
+        return json.routes[0].legs.reduce((acc,leg)=>acc+(leg.duration?.value||0),0);
+      } catch { return Infinity; }
+    } catch { return Infinity; }
     }
 
     function renderSolution(sol){
@@ -399,6 +408,14 @@
     }
     function badge(label, color){ return `<span class=\"chip\" style=\"border-color:${color}; background:${color}1a; color:${color}\">${label}</span>`; }
     function labelForKind(sol){ if (sol.kind==='bike-only') return 'Best: Bike only'; if (sol.kind==='transit-only') return 'Best: Transit only'; if (sol.kind==='combo') return 'Best: Cycle → TfL → Cycle'; return 'Best route'; }
+  </script>
+  <script>
+    // PWA: register service worker if available
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      });
+    }
   </script>
 </body>
 </html>

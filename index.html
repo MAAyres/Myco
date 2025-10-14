@@ -310,12 +310,15 @@
     }
 
     function sumDurationREST(json){
-      try {
-        if (json.status && json.status !== 'OK') return Infinity;
-        return json.routes[0].legs.reduce((acc,leg)=>acc+(leg.duration?.value||0),0);
-      } catch { return Infinity; }
-    } catch { return Infinity; }
-    }
+  try {
+    if (json.status && json.status !== 'OK') return Infinity;
+    const legs = json.routes?.[0]?.legs || [];
+    return legs.reduce((acc, leg) => acc + (leg.duration?.value || 0), 0);
+  } catch (e) {
+    console.warn('sumDurationREST error', e);
+    return Infinity;
+  }
+}
 
     function renderSolution(sol){
       const summary = el('summary'); summary.innerHTML=''; el('fare').innerHTML='';

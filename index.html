@@ -80,10 +80,7 @@
             <span class="value-badge chip"><span id="cycleVal">10</span> min</span>
           </div>
           <input id="cycleTime" type="range" min="5" max="60" step="5" value="10" class="slider mt-1" />
-        </div>
-        <div>
-          <label class="section-title">Bike speed (km/h)</label>
-          <input id="bikeSpeed" type="number" min="8" max="30" step="1" value="16" class="field" />
+          <p class="text-xs text-slate-600 mt-1">Cycle segments assume rentable e-bikes cruising at ~20&nbsp;km/h.</p>
         </div>
       </div>
 
@@ -137,6 +134,10 @@
 
     const el = (id) => document.getElementById(id);
     const msg = (t) => el('msg').innerHTML = t || '';
+
+    const GOOGLE_BASE_CYCLING_SPEED_KMH = 16; // Google cycling directions baseline
+    const ASSUMED_E_BIKE_SPEED_KMH = 20; // rentable e-bike assumption
+    const BIKE_TIME_MODIFIER = GOOGLE_BASE_CYCLING_SPEED_KMH / ASSUMED_E_BIKE_SPEED_KMH;
 
     const LINE_COLOURS = {
       'Bakerloo':'#B36305','Central':'#E32017','Circle':'#FFD300','District':'#00782A','Hammersmith & City':'#F3A9BB','Jubilee':'#A0A5A9','Metropolitan':'#9B0056','Northern':'#000000','Piccadilly':'#003688','Victoria':'#0098D4','Waterloo & City':'#95CDBA','DLR':'#00A4A7','London Overground':'#EE7C0E','Elizabeth line':'#6950A1','Tram':'#009999','Bus':'#CC0000'
@@ -287,7 +288,7 @@ function addStationMarker(position, isOriginSide){
 
       const maxCycleMin = parseInt(el('cycleTime').value,10);
       const strictCap = el('strictCap').checked;
-      const bikeSpeedKmh = parseFloat(el('bikeSpeed').value || '16');
+      const bikeSpeedKmh = ASSUMED_E_BIKE_SPEED_KMH;
       const maxCycleMeters = Math.round((bikeSpeedKmh * 1000 / 3600) * (maxCycleMin * 60));
 
       const originLL = originPlace.geometry.location; const destLL = destPlace.geometry.location;
@@ -313,7 +314,7 @@ function addStationMarker(position, isOriginSide){
       // Bike-only
       try {
         const bikeOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'BICYCLING' });
-        const tBike = sumDurationREST(bikeOD);
+        const tBike = adjustCycleDuration(sumDurationREST(bikeOD));
         const allowBikeOnly = !strictCap || (tBike <= maxCycleMin*60);
         if (allowBikeOnly) candidates.push({ kind:'bike-only', totalSec:tBike, segments:[{ mode:'BICYCLING', res: bikeOD }] });
       } catch (e) { console.warn('Bike-only failed:', e.message); }
@@ -333,7 +334,7 @@ function addStationMarker(position, isOriginSide){
             const seg1 = await fetchDirections({ origin: str(originLL), destination: `${a.location.lat()},${a.location.lng()}`, mode:'BICYCLING' });
             const seg2 = await fetchDirections({ origin: `${a.location.lat()},${a.location.lng()}`, destination: `${b.location.lat()},${b.location.lng()}`, mode:'TRANSIT', transitModes:['SUBWAY','TRAIN','TRAM','BUS'] });
             const seg3 = await fetchDirections({ origin: `${b.location.lat()},${b.location.lng()}`, destination: str(destLL), mode:'BICYCLING' });
-            const t1=sumDurationREST(seg1), t2=sumDurationREST(seg2), t3=sumDurationREST(seg3);
+            const t1=adjustCycleDuration(sumDurationREST(seg1)), t2=sumDurationREST(seg2), t3=adjustCycleDuration(sumDurationREST(seg3));
             if (t1>maxCycleMin*60 || t3>maxCycleMin*60) continue;
             candidates.push({ kind:'combo', totalSec:t1+t2+t3, parts:{a,b}, segments:[{mode:'BICYCLING',res:seg1},{mode:'TRANSIT',res:seg2},{mode:'BICYCLING',res:seg3}] });
           } catch (e) { /* skip bad pair */ }
@@ -349,6 +350,11 @@ function addStationMarker(position, isOriginSide){
       const cycleOnly = candidates.find(c => c.kind === 'bike-only');
       renderSolution(best, (cycleOnly && cycleOnly !== best) ? cycleOnly : null);
       msg('');
+    }
+
+    function adjustCycleDuration(seconds){
+      if (!Number.isFinite(seconds)) return seconds;
+      return Math.round(seconds * BIKE_TIME_MODIFIER);
     }
 
     function sumDurationREST(json){
@@ -382,9 +388,9 @@ function addStationMarker(position, isOriginSide){
 
       const list = document.createElement('ol'); list.className='list-decimal pl-5 space-y-3';
       if (sol.kind==='combo'){
-        const li1=document.createElement('li'); li1.innerHTML = `<div class="font-medium">Cycle — ${fmt(sumDurationREST(sol.segments[0].res))}</div><div class="text-xs text-slate-600">to <b>${sol.parts.a.name}</b></div>`; list.appendChild(li1);
+        const li1=document.createElement('li'); li1.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[0].res)))}</div><div class="text-xs text-slate-600">to <b>${sol.parts.a.name}</b></div>`; list.appendChild(li1);
         const li2=document.createElement('li'); li2.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sumDurationREST(sol.segments[1].res))}</div>`; list.appendChild(li2);
-        const li3=document.createElement('li'); li3.innerHTML = `<div class="font-medium">Cycle — ${fmt(sumDurationREST(sol.segments[2].res))}</div><div class="text-xs text-slate-600">from <b>${sol.parts.b.name}</b> to destination</div>`; list.appendChild(li3);
+        const li3=document.createElement('li'); li3.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[2].res)))}</div><div class="text-xs text-slate-600">from <b>${sol.parts.b.name}</b> to destination</div>`; list.appendChild(li3);
       } else if (sol.kind==='bike-only'){
         const li=document.createElement('li'); li.innerHTML = `<div class="font-medium">Cycle — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
       } else if (sol.kind==='transit-only'){
@@ -446,7 +452,7 @@ function addStationMarker(position, isOriginSide){
         diffRow.textContent = diffLabel; block.appendChild(diffRow);
 
         const detail=document.createElement('div'); detail.className='text-sm text-slate-800 mt-2';
-        detail.innerHTML = `<span class="font-medium">Cycle</span> — ${fmt(sumDurationREST(compareCycle.segments[0].res))}`;
+        detail.innerHTML = `<span class="font-medium">Cycle</span> — ${fmt(adjustCycleDuration(sumDurationREST(compareCycle.segments[0].res)))}`;
         block.appendChild(detail);
 
         summary.appendChild(block);

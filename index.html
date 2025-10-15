@@ -452,6 +452,21 @@ function addStationMarker(position, isOriginSide){
       return r;
     }
     function badge(label, color){ return `<span class="chip" style="border-color:${color}; background:${color}1a; color:${color}">${label}</span>`; }
+    function labelForKind(sol){
+      switch (sol?.kind) {
+        case 'combo': {
+          const from = sol?.parts?.a?.name || 'origin';
+          const to = sol?.parts?.b?.name || 'destination';
+          return `Cycle + TfL via ${from} → ${to}`;
+        }
+        case 'bike-only':
+          return 'Cycle only';
+        case 'transit-only':
+          return 'TfL Transit only';
+        default:
+          return 'Best route';
+      }
+    }
 
     // ===== Optional tiny debug badge (remove if you like) =====
     (async function diag(){

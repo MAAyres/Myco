@@ -346,7 +346,8 @@ function addStationMarker(position, isOriginSide){
       }
       candidates.sort((x,y)=>x.totalSec-y.totalSec);
       const best = candidates[0];
-      renderSolution(best);
+      const cycleOnly = candidates.find(c => c.kind === 'bike-only');
+      renderSolution(best, (cycleOnly && cycleOnly !== best) ? cycleOnly : null);
       msg('');
     }
 
@@ -361,7 +362,7 @@ function addStationMarker(position, isOriginSide){
       }
     }
 
-    function renderSolution(sol){
+    function renderSolution(sol, compareCycle){
       const summary = el('summary'); summary.innerHTML=''; el('fare').innerHTML='';
       const fmt = (s)=>{ const m=Math.round(s/60); return m<60? `${m} min` : `${Math.floor(m/60)}h ${m%60}m`; };
 
@@ -427,6 +428,27 @@ function addStationMarker(position, isOriginSide){
           row.innerHTML = `<span class="text-xs font-semibold text-slate-700">Transfers:</span> ` + transfers.map(tb => `${badge(tb.from, LINE_COLOURS[tb.from]||'#334155')} → ${badge(tb.to, LINE_COLOURS[tb.to]||'#334155')} <span class="text-slate-600">@ ${tb.at}</span>`).join(' ');
           block.appendChild(row);
         }
+        summary.appendChild(block);
+      }
+
+      if (compareCycle && compareCycle.kind === 'bike-only' && sol.kind !== 'bike-only'){
+        const block=document.createElement('div'); block.className='mt-4 p-4 rounded-[1.25rem] bg-white/70 border border-white/80';
+        const head=document.createElement('div'); head.className='text-sm font-semibold text-slate-800';
+        head.textContent='Cycle-only comparison'; block.appendChild(head);
+
+        const total=document.createElement('div'); total.className='text-sm text-slate-700 mt-1';
+        total.innerHTML = `Total time: <span class="font-semibold">${fmt(compareCycle.totalSec)}</span>`;
+        block.appendChild(total);
+
+        const diffSec = compareCycle.totalSec - sol.totalSec;
+        const diffRow=document.createElement('div'); diffRow.className='text-xs text-slate-600 mt-1';
+        const diffLabel = diffSec>0 ? `+${fmt(diffSec)} slower than best option` : diffSec<0 ? `-${fmt(-diffSec)} faster than best option` : 'Matches best option time';
+        diffRow.textContent = diffLabel; block.appendChild(diffRow);
+
+        const detail=document.createElement('div'); detail.className='text-sm text-slate-800 mt-2';
+        detail.innerHTML = `<span class="font-medium">Cycle</span> — ${fmt(sumDurationREST(compareCycle.segments[0].res))}`;
+        block.appendChild(detail);
+
         summary.appendChild(block);
       }
     }

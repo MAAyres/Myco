@@ -436,13 +436,39 @@
       // Settings Autocomplete
       const homeInput = el('setHome');
       const workInput = el('setWork');
-      new google.maps.places.Autocomplete(homeInput, { fields: ["formatted_address"] });
-      new google.maps.places.Autocomplete(workInput, { fields: ["formatted_address"] });
+      const homeAC = new google.maps.places.Autocomplete(homeInput, { fields: ["geometry", "formatted_address"] });
+      const workAC = new google.maps.places.Autocomplete(workInput, { fields: ["geometry", "formatted_address"] });
+
+      let tempHomePlace = null;
+      let tempWorkPlace = null;
+
+      homeAC.addListener('place_changed', () => { tempHomePlace = homeAC.getPlace(); });
+      workAC.addListener('place_changed', () => { tempWorkPlace = workAC.getPlace(); });
 
       el('saveSettings').addEventListener('click', () => {
+        // We read the existing to preserve if not modified? No, typical save overwrites.
+        // But we need to handle if user typed text but didn't select new place (rare in this flow, but possible).
+        // If inputs are empty, clear.
+        const currentSaved = localStorage.getItem('myco_places');
+        const old = currentSaved ? JSON.parse(currentSaved) : {};
+
+        const saveItem = (inputVal, tempPlace, oldItem) => {
+          if (!inputVal) return null;
+          // If user selected a new place from dropdown
+          if (tempPlace && tempPlace.geometry && tempPlace.formatted_address === inputVal) {
+            return { address: inputVal, lat: tempPlace.geometry.location.lat(), lng: tempPlace.geometry.location.lng() };
+          }
+          // If user didn't change the text, keep old geometry if it matches (handling object/string variants)
+          const oldAddr = (typeof oldItem === 'string') ? oldItem : oldItem?.address;
+          if (oldAddr === inputVal) return oldItem;
+
+          // If user typed random text (no geometry), just save text (and we'll fail to geocode later, but standard behavior)
+          return { address: inputVal, lat: null, lng: null }; // Fallback to text
+        };
+
         const places = {
-          home: homeInput.value,
-          work: workInput.value
+          home: saveItem(homeInput.value, tempHomePlace, old.home),
+          work: saveItem(workInput.value, tempWorkPlace, old.work)
         };
         localStorage.setItem('myco_places', JSON.stringify(places));
         toggleSettings(false);
@@ -462,9 +488,12 @@
     function loadSettingsInputs() {
       const saved = localStorage.getItem('myco_places');
       if (saved) {
-        const p = JSON.parse(saved);
-        if (p.home) el('setHome').value = p.home;
-        if (p.work) el('setWork').value = p.work;
+        try {
+          const p = JSON.parse(saved);
+          // Handle both old format (string) and new format (object)
+          if (p.home) el('setHome').value = (typeof p.home === 'string') ? p.home : p.home.address;
+          if (p.work) el('setWork').value = (typeof p.work === 'string') ? p.work : p.work.address;
+        } catch (e) { }
       }
     }
 
@@ -472,12 +501,38 @@
     function useSavedPlace(key, targetId) {
       const saved = localStorage.getItem('myco_places');
       const places = saved ? JSON.parse(saved) : {};
-      const val = places[key];
-      if (val && val.trim().length > 0) {
-        el(targetId).value = val;
-        // Clear previous place object to force re-lookup via Text Search fallback
-        if (targetId === 'origin') originPlace = null;
-        if (targetId === 'destination') destPlace = null;
+      let val = places[key];
+
+      // Migrate old format on the fly if needed (or just treat as text)
+      let addr = '';
+      let loc = null;
+      if (typeof val === 'string') { addr = val; }
+      else if (val && val.address) { addr = val.address; loc = val; }
+
+      if (addr && addr.trim().length > 0) {
+        el(targetId).value = addr;
+
+        // Hydrate the place object immediately if we have coords!
+        if (loc && loc.lat && loc.lng) {
+          const reconstructed = {
+            geometry: { location: new google.maps.LatLng(loc.lat, loc.lng) },
+            formatted_address: addr,
+            name: addr.split(',')[0]
+          };
+          if (targetId === 'origin') {
+            originPlace = reconstructed;
+            setMarker('origin', originPlace.geometry.location);
+            map.panTo(originPlace.geometry.location);
+          }
+          if (targetId === 'destination') {
+            destPlace = reconstructed;
+            setMarker('dest', destPlace.geometry.location);
+          }
+        } else {
+          // Fallback to clearing if we don't have coords (legacy data)
+          if (targetId === 'origin') originPlace = null;
+          if (targetId === 'destination') destPlace = null;
+        }
       } else {
         // Open settings if missing
         loadSettingsInputs();

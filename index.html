@@ -716,7 +716,14 @@
             }
           }
         }
-      } catch (e) { console.warn(e); }
+      } catch (e) {
+        console.warn(e);
+        // If this was our last hope (no geometry), show the specific error
+        if (!originPlace?.geometry || !destPlace?.geometry) {
+          msg(`Route failed: ${e.message}. Check Directions API is enabled.`);
+          return;
+        }
+      }
 
       // Now we (hopefully) have valid originPlace/destPlace geometry.
       // If we STILL fail, we really can't do anything (route impossible).

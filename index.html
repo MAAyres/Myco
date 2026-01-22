@@ -658,6 +658,8 @@
 
     // ===== Planner =====
     async function planBestRoute() {
+      console.log('planBestRoute started');
+      msg('Planning route...');
       // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
       // We rely on Directions API's natural language parsing if we pass the strings directly.
       // However, for StationService & Weather we need Lat/Lng. So we must geocode first if missing.

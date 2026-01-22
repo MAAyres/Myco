@@ -660,6 +660,13 @@
     async function planBestRoute() {
       console.log('planBestRoute started');
       msg('Planning route...');
+
+      // Read UI State
+      const maxCycleMin = parseInt(el('cycleTime').value, 10) || 10;
+      // Approx 333m per minute @ 20km/h
+      const maxCycleMeters = maxCycleMin * 333;
+      const strictCap = el('strictCap').checked;
+
       // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
       // We rely on Directions API's natural language parsing if we pass the strings directly.
       // However, for StationService & Weather we need Lat/Lng. So we must geocode first if missing.

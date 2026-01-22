@@ -1,77 +1,272 @@
-// Representative subset of London TfL stations for the client-side router.
-// To expand, add more stations with { name, lat, lng, lines:[] }.
+// Comprehensive London Station Data
+// Includes Tube, DLR, Overground, Elizabeth Line, and major National Rail interchanges.
 
 const STATIONS_DATA = [
-  // Major Terminals
-  { name: "King's Cross St. Pancras", lat: 51.5308, lng: -0.1238, lines: ["Northern", "Victoria", "Piccadilly", "Circle", "Hammersmith & City", "Metropolitan"] },
-  { name: "Waterloo", lat: 51.5032, lng: -0.1147, lines: ["Jubilee", "Northern", "Bakerloo", "Waterloo & City"] },
+  // === BAKERLOO ===
+  { name: "Elephant & Castle", lat: 51.4952, lng: -0.1018, lines: ["Bakerloo", "Northern"] },
+  { name: "Lambeth North", lat: 51.4988, lng: -0.1123, lines: ["Bakerloo"] },
+  { name: "Waterloo", lat: 51.5032, lng: -0.1147, lines: ["Bakerloo", "Jubilee", "Northern", "Waterloo & City"] },
+  { name: "Embankment", lat: 51.5071, lng: -0.1227, lines: ["Bakerloo", "Circle", "District", "Northern"] },
+  { name: "Charing Cross", lat: 51.5080, lng: -0.1247, lines: ["Bakerloo", "Northern"] },
+  { name: "Piccadilly Circus", lat: 51.5101, lng: -0.1342, lines: ["Bakerloo", "Piccadilly"] },
+  { name: "Oxford Circus", lat: 51.5152, lng: -0.1419, lines: ["Bakerloo", "Central", "Victoria"] },
+  { name: "Regent's Park", lat: 51.5234, lng: -0.1466, lines: ["Bakerloo"] },
+  { name: "Baker Street", lat: 51.5231, lng: -0.1569, lines: ["Bakerloo", "Circle", "Hammersmith & City", "Jubilee", "Metropolitan"] },
+  { name: "Marylebone", lat: 51.5226, lng: -0.1631, lines: ["Bakerloo"] },
+  { name: "Edgware Road (Bakerloo)", lat: 51.5203, lng: -0.1700, lines: ["Bakerloo"] },
   { name: "Paddington", lat: 51.5154, lng: -0.1755, lines: ["Bakerloo", "Circle", "District", "Hammersmith & City", "Elizabeth line"] },
-  { name: "Liverpool Street", lat: 51.5178, lng: -0.0817, lines: ["Central", "Circle", "Hammersmith & City", "Metropolitan", "Elizabeth line", "London Overground"] },
-  { name: "London Bridge", lat: 51.5055, lng: -0.0868, lines: ["Jubilee", "Northern"] },
-  { name: "Victoria", lat: 51.4964, lng: -0.1439, lines: ["Victoria", "Circle", "District"] },
-  { name: "Euston", lat: 51.5281, lng: -0.1336, lines: ["Northern", "Victoria", "London Overground"] },
+  { name: "Warwick Avenue", lat: 51.5234, lng: -0.1835, lines: ["Bakerloo"] },
+  { name: "Maida Vale", lat: 51.5299, lng: -0.1855, lines: ["Bakerloo"] },
+  { name: "Kilburn Park", lat: 51.5351, lng: -0.1941, lines: ["Bakerloo"] },
+  { name: "Queen's Park", lat: 51.5341, lng: -0.2046, lines: ["Bakerloo", "London Overground"] },
+  { name: "Kensal Green", lat: 51.5305, lng: -0.2186, lines: ["Bakerloo", "London Overground"] },
+  { name: "Willesden Junction", lat: 51.5322, lng: -0.2437, lines: ["Bakerloo", "London Overground"] },
+  { name: "Harlesden", lat: 51.5362, lng: -0.2574, lines: ["Bakerloo", "London Overground"] },
+  { name: "Stonebridge Park", lat: 51.5440, lng: -0.2758, lines: ["Bakerloo", "London Overground"] },
+  { name: "Wembley Central", lat: 51.5523, lng: -0.2965, lines: ["Bakerloo", "London Overground"] },
+  { name: "North Wembley", lat: 51.5626, lng: -0.3039, lines: ["Bakerloo", "London Overground"] },
+  { name: "South Kenton", lat: 51.5707, lng: -0.3083, lines: ["Bakerloo", "London Overground"] },
+  { name: "Kenton", lat: 51.5817, lng: -0.3168, lines: ["Bakerloo", "London Overground"] },
+  { name: "Harrow & Wealdstone", lat: 51.5923, lng: -0.3353, lines: ["Bakerloo", "London Overground"] },
 
-  // Central Hubs
-  { name: "Oxford Circus", lat: 51.5152, lng: -0.1419, lines: ["Central", "Bakerloo", "Victoria"] },
-  { name: "Bank", lat: 51.5134, lng: -0.0891, lines: ["Central", "Northern", "Waterloo & City", "DLR"] },
-  { name: "Holborn", lat: 51.5174, lng: -0.1200, lines: ["Central", "Piccadilly"] },
-  { name: "Bond Street", lat: 51.5142, lng: -0.1494, lines: ["Central", "Jubilee", "Elizabeth line"] },
-  { name: "Green Park", lat: 51.5067, lng: -0.1428, lines: ["Jubilee", "Piccadilly", "Victoria"] },
-  { name: "Leicester Square", lat: 51.5113, lng: -0.1285, lines: ["Northern", "Piccadilly"] },
-  { name: "Tottenham Court Road", lat: 51.5165, lng: -0.1310, lines: ["Central", "Northern", "Elizabeth line"] },
-  
-  // Key Interchanges
-  { name: "Stratford", lat: 51.5416, lng: -0.0034, lines: ["Central", "Jubilee", "Elizabeth line", "DLR", "London Overground"] },
-  { name: "Canary Wharf", lat: 51.5035, lng: -0.0186, lines: ["Jubilee", "Elizabeth line", "DLR"] },
-  { name: "Canada Water", lat: 51.4980, lng: -0.0497, lines: ["Jubilee", "London Overground"] },
-  { name: "Elephant & Castle", lat: 51.4945, lng: -0.1006, lines: ["Bakerloo", "Northern"] },
-  { name: "South Kensington", lat: 51.4941, lng: -0.1738, lines: ["District", "Circle", "Piccadilly"] },
-  { name: "Finbury Park", lat: 51.5642, lng: -0.1064, lines: ["Victoria", "Piccadilly"] },
-  { name: "Highbury & Islington", lat: 51.5463, lng: -0.1035, lines: ["Victoria", "London Overground"] },
-  
-  // North
-  { name: "Camden Town", lat: 51.5392, lng: -0.1426, lines: ["Northern"] },
-  { name: "Archway", lat: 51.5654, lng: -0.1348, lines: ["Northern"] },
-  { name: "Hampstead", lat: 51.5567, lng: -0.1783, lines: ["Northern"] },
-  
-  // South
-  { name: "Brixton", lat: 51.4626, lng: -0.1147, lines: ["Victoria"] },
-  { name: "Clapham Junction", lat: 51.4651, lng: -0.1706, lines: ["London Overground"] }, // Mostly rail, but key
-  { name: "Vauxhall", lat: 51.4861, lng: -0.1253, lines: ["Victoria"] },
-  { name: "Wimbledon", lat: 51.4214, lng: -0.2066, lines: ["District", "Tram"] },
-  
-  // East
-  { name: "Whitechapel", lat: 51.5194, lng: -0.0601, lines: ["District", "Hammersmith & City", "London Overground", "Elizabeth line"] },
-  { name: "Shoreditch High Street", lat: 51.5234, lng: -0.0759, lines: ["London Overground"] },
-  
-  // West
-  { name: "Hammersmith", lat: 51.4925, lng: -0.2238, lines: ["District", "Piccadilly", "Hammersmith & City", "Circle"] },
+  // === CENTRAL ===
+  { name: "West Ruislip", lat: 51.5706, lng: -0.4379, lines: ["Central"] },
+  { name: "Ruislip Gardens", lat: 51.5606, lng: -0.4109, lines: ["Central"] },
+  { name: "South Ruislip", lat: 51.5569, lng: -0.3988, lines: ["Central"] },
+  { name: "Northolt", lat: 51.5482, lng: -0.3686, lines: ["Central"] },
+  { name: "Greenford", lat: 51.5424, lng: -0.3458, lines: ["Central"] },
+  { name: "Perivale", lat: 51.5367, lng: -0.3235, lines: ["Central"] },
+  { name: "Hanger Lane", lat: 51.5298, lng: -0.2929, lines: ["Central"] },
+  { name: "Ealing Broadway", lat: 51.5149, lng: -0.3015, lines: ["Central", "District", "Elizabeth line"] },
+  { name: "West Acton", lat: 51.5179, lng: -0.2806, lines: ["Central"] },
+  { name: "North Acton", lat: 51.5236, lng: -0.2597, lines: ["Central"] },
+  { name: "East Acton", lat: 51.5168, lng: -0.2475, lines: ["Central"] },
+  { name: "White City", lat: 51.5119, lng: -0.2241, lines: ["Central"] },
   { name: "Shepherd's Bush", lat: 51.5046, lng: -0.2185, lines: ["Central", "London Overground"] },
-  { name: "Notting Hill Gate", lat: 51.5091, lng: -0.1961, lines: ["Central", "District", "Circle"] },
-  { name: "Earl's Court", lat: 51.4921, lng: -0.1925, lines: ["District", "Piccadilly"] }
+  { name: "Holland Park", lat: 51.5074, lng: -0.2062, lines: ["Central"] },
+  { name: "Notting Hill Gate", lat: 51.5091, lng: -0.1961, lines: ["Central", "Circle", "District"] },
+  { name: "Queensway", lat: 51.5105, lng: -0.1873, lines: ["Central"] },
+  { name: "Lancaster Gate", lat: 51.5117, lng: -0.1755, lines: ["Central"] },
+  { name: "Marble Arch", lat: 51.5135, lng: -0.1587, lines: ["Central"] },
+  { name: "Bond Street", lat: 51.5142, lng: -0.1494, lines: ["Central", "Jubilee", "Elizabeth line"] },
+  { name: "Tottenham Court Road", lat: 51.5165, lng: -0.1310, lines: ["Central", "Northern", "Elizabeth line"] },
+  { name: "Holborn", lat: 51.5174, lng: -0.1200, lines: ["Central", "Piccadilly"] },
+  { name: "Chancery Lane", lat: 51.5182, lng: -0.1111, lines: ["Central"] },
+  { name: "St. Paul's", lat: 51.5146, lng: -0.0975, lines: ["Central"] },
+  { name: "Bank", lat: 51.5134, lng: -0.0891, lines: ["Central", "Northern", "Waterloo & City", "DLR"] },
+  { name: "Liverpool Street", lat: 51.5178, lng: -0.0817, lines: ["Central", "Circle", "Hammersmith & City", "Metropolitan", "Elizabeth line", "London Overground"] },
+  { name: "Bethnal Green", lat: 51.5273, lng: -0.0555, lines: ["Central"] },
+  { name: "Mile End", lat: 51.5252, lng: -0.0333, lines: ["Central", "District", "Hammersmith & City"] },
+  { name: "Stratford", lat: 51.5416, lng: -0.0034, lines: ["Central", "Jubilee", "DLR", "London Overground", "Elizabeth line"] },
+  { name: "Leyton", lat: 51.5566, lng: -0.0055, lines: ["Central"] },
+  { name: "Leytonstone", lat: 51.5684, lng: 0.0081, lines: ["Central"] },
+  { name: "Wanstead", lat: 51.5756, lng: 0.0287, lines: ["Central"] },
+  { name: "Redbridge", lat: 51.5763, lng: 0.0454, lines: ["Central"] },
+  { name: "Gants Hill", lat: 51.5765, lng: 0.0662, lines: ["Central"] },
+  { name: "Newbury Park", lat: 51.5753, lng: 0.0898, lines: ["Central"] },
+  { name: "Barkingside", lat: 51.5857, lng: 0.0886, lines: ["Central"] },
+  { name: "Fairlop", lat: 51.5958, lng: 0.0909, lines: ["Central"] },
+  { name: "Hainault", lat: 51.6033, lng: 0.0934, lines: ["Central"] },
+  { name: "Grange Hill", lat: 51.6133, lng: 0.0921, lines: ["Central"] },
+  { name: "Chigwell", lat: 51.6179, lng: 0.0751, lines: ["Central"] },
+  { name: "Roding Valley", lat: 51.6171, lng: 0.0437, lines: ["Central"] },
+  { name: "Snaresbrook", lat: 51.5804, lng: 0.0215, lines: ["Central"] },
+  { name: "South Woodford", lat: 51.5919, lng: 0.0275, lines: ["Central"] },
+  { name: "Woodford", lat: 51.6069, lng: 0.0340, lines: ["Central"] },
+  { name: "Buckhurst Hill", lat: 51.6265, lng: 0.0468, lines: ["Central"] },
+  { name: "Loughton", lat: 51.6415, lng: 0.0553, lines: ["Central"] },
+  { name: "Debden", lat: 51.6455, lng: 0.0838, lines: ["Central"] },
+  { name: "Theydon Bois", lat: 51.6718, lng: 0.1030, lines: ["Central"] },
+  { name: "Epping", lat: 51.6937, lng: 0.1139, lines: ["Central"] },
+
+  // === CIRCLE / DISTRICT / H&C (Inner) ===
+  { name: "South Kensington", lat: 51.4941, lng: -0.1738, lines: ["Circle", "District", "Piccadilly"] },
+  { name: "Sloane Square", lat: 51.4924, lng: -0.1565, lines: ["Circle", "District"] },
+  { name: "Victoria", lat: 51.4964, lng: -0.1439, lines: ["Circle", "District", "Victoria"] },
+  { name: "St. James's Park", lat: 51.4994, lng: -0.1336, lines: ["Circle", "District"] },
+  { name: "Westminster", lat: 51.5010, lng: -0.1254, lines: ["Circle", "District", "Jubilee"] },
+  { name: "Temple", lat: 51.5110, lng: -0.1141, lines: ["Circle", "District"] },
+  { name: "Blackfriars", lat: 51.5116, lng: -0.1033, lines: ["Circle", "District"] },
+  { name: "Mansion House", lat: 51.5121, lng: -0.0940, lines: ["Circle", "District"] },
+  { name: "Cannon Street", lat: 51.5114, lng: -0.0904, lines: ["Circle", "District"] },
+  { name: "Monument", lat: 51.5107, lng: -0.0860, lines: ["Circle", "District"] },
+  { name: "Tower Hill", lat: 51.5100, lng: -0.0763, lines: ["Circle", "District"] },
+  { name: "Aldgate", lat: 51.5143, lng: -0.0756, lines: ["Circle", "Metropolitan"] },
+  { name: "Aldgate East", lat: 51.5152, lng: -0.0722, lines: ["District", "Hammersmith & City"] },
+  { name: "Barbican", lat: 51.5203, lng: -0.0978, lines: ["Circle", "Hammersmith & City", "Metropolitan"] },
+  { name: "Farringdon", lat: 51.5205, lng: -0.1052, lines: ["Circle", "Hammersmith & City", "Metropolitan", "Elizabeth line"] },
+  { name: "King's Cross St. Pancras", lat: 51.5308, lng: -0.1238, lines: ["Northern", "Victoria", "Piccadilly", "Circle", "Hammersmith & City", "Metropolitan"] },
+  { name: "Euston Square", lat: 51.5257, lng: -0.1359, lines: ["Circle", "Hammersmith & City", "Metropolitan"] },
+  { name: "Great Portland Street", lat: 51.5238, lng: -0.1439, lines: ["Circle", "Hammersmith & City", "Metropolitan"] },
+  { name: "Edgware Road (Circle)", lat: 51.5199, lng: -0.1678, lines: ["Circle", "District", "Hammersmith & City"] },
+
+  // === DISTRICT BRANCHES ===
+  { name: "Earl's Court", lat: 51.4921, lng: -0.1925, lines: ["District", "Piccadilly"] },
+  { name: "West Brompton", lat: 51.4871, lng: -0.1956, lines: ["District", "London Overground"] },
+  { name: "Fulham Broadway", lat: 51.4804, lng: -0.1950, lines: ["District"] },
+  { name: "Parsons Green", lat: 51.4753, lng: -0.2013, lines: ["District"] },
+  { name: "Putney Bridge", lat: 51.4682, lng: -0.2088, lines: ["District"] },
+  { name: "East Putney", lat: 51.4587, lng: -0.2109, lines: ["District"] },
+  { name: "Southfields", lat: 51.4452, lng: -0.2066, lines: ["District"] },
+  { name: "Wimbledon Park", lat: 51.4344, lng: -0.1994, lines: ["District"] },
+  { name: "Wimbledon", lat: 51.4214, lng: -0.2066, lines: ["District", "Tram"] },
+  { name: "West Kensington", lat: 51.4905, lng: -0.2067, lines: ["District"] },
+  { name: "Barons Court", lat: 51.4905, lng: -0.2127, lines: ["District", "Piccadilly"] },
+  { name: "Hammersmith", lat: 51.4925, lng: -0.2238, lines: ["District", "Piccadilly", "Hammersmith & City", "Circle"] },
+  { name: "Ravenscourt Park", lat: 51.4941, lng: -0.2361, lines: ["District"] },
+  { name: "Stamford Brook", lat: 51.4949, lng: -0.2458, lines: ["District"] },
+  { name: "Turnham Green", lat: 51.4951, lng: -0.2547, lines: ["District", "Piccadilly"] },
+  { name: "Gunnersbury", lat: 51.4913, lng: -0.2755, lines: ["District", "London Overground"] },
+  { name: "Kew Gardens", lat: 51.4770, lng: -0.2848, lines: ["District", "London Overground"] },
+  { name: "Richmond", lat: 51.4632, lng: -0.3013, lines: ["District", "London Overground"] },
+  { name: "High Street Kensington", lat: 51.5008, lng: -0.1925, lines: ["Circle", "District"] },
+  { name: "Bayswater", lat: 51.5122, lng: -0.1879, lines: ["Circle", "District"] },
+
+  // === JUBILEE ===
+  { name: "Stanmore", lat: 51.6193, lng: -0.2942, lines: ["Jubilee"] },
+  { name: "Canons Park", lat: 51.6075, lng: -0.2946, lines: ["Jubilee"] },
+  { name: "Queensbury", lat: 51.5937, lng: -0.2804, lines: ["Jubilee"] },
+  { name: "Kingsbury", lat: 51.5847, lng: -0.2787, lines: ["Jubilee"] },
+  { name: "Wembley Park", lat: 51.5636, lng: -0.2795, lines: ["Jubilee", "Metropolitan"] },
+  { name: "Neasden", lat: 51.5539, lng: -0.2492, lines: ["Jubilee"] },
+  { name: "Dollis Hill", lat: 51.5520, lng: -0.2388, lines: ["Jubilee"] },
+  { name: "Willesden Green", lat: 51.5492, lng: -0.2215, lines: ["Jubilee"] },
+  { name: "Kilburn", lat: 51.5471, lng: -0.2045, lines: ["Jubilee"] },
+  { name: "West Hampstead", lat: 51.5469, lng: -0.1910, lines: ["Jubilee", "London Overground"] },
+  { name: "Finchley Road", lat: 51.5472, lng: -0.1798, lines: ["Jubilee", "Metropolitan"] },
+  { name: "Swiss Cottage", lat: 51.5434, lng: -0.1751, lines: ["Jubilee"] },
+  { name: "St. John's Wood", lat: 51.5347, lng: -0.1740, lines: ["Jubilee"] },
+  { name: "Green Park", lat: 51.5067, lng: -0.1428, lines: ["Jubilee", "Piccadilly", "Victoria"] },
+  { name: "Southwark", lat: 51.5039, lng: -0.1051, lines: ["Jubilee"] },
+  { name: "London Bridge", lat: 51.5055, lng: -0.0868, lines: ["Jubilee", "Northern"] },
+  { name: "Bermondsey", lat: 51.4975, lng: -0.0631, lines: ["Jubilee"] },
+  { name: "Canada Water", lat: 51.4980, lng: -0.0497, lines: ["Jubilee", "London Overground"] },
+  { name: "Canary Wharf", lat: 51.5035, lng: -0.0186, lines: ["Jubilee", "Elizabeth line", "DLR"] },
+  { name: "North Greenwich", lat: 51.5005, lng: 0.0043, lines: ["Jubilee"] },
+  { name: "Canning Town", lat: 51.5147, lng: 0.0083, lines: ["Jubilee", "DLR"] },
+  { name: "West Ham", lat: 51.5284, lng: 0.0053, lines: ["Jubilee", "District", "Hammersmith & City", "DLR"] },
+
+  // === NORTHERN ===
+  { name: "Morden", lat: 51.4026, lng: -0.1947, lines: ["Northern"] },
+  { name: "South Wimbledon", lat: 51.4150, lng: -0.1923, lines: ["Northern"] },
+  { name: "Colliers Wood", lat: 51.4182, lng: -0.1779, lines: ["Northern"] },
+  { name: "Tooting Broadway", lat: 51.4276, lng: -0.1683, lines: ["Northern"] },
+  { name: "Tooting Bec", lat: 51.4360, lng: -0.1596, lines: ["Northern"] },
+  { name: "Balham", lat: 51.4432, lng: -0.1527, lines: ["Northern"] },
+  { name: "Clapham South", lat: 51.4526, lng: -0.1477, lines: ["Northern"] },
+  { name: "Clapham Common", lat: 51.4617, lng: -0.1382, lines: ["Northern"] },
+  { name: "Clapham North", lat: 51.4651, lng: -0.1301, lines: ["Northern"] },
+  { name: "Stockwell", lat: 51.4722, lng: -0.1226, lines: ["Northern", "Victoria"] },
+  { name: "Oval", lat: 51.4818, lng: -0.1124, lines: ["Northern"] },
+  { name: "Kennington", lat: 51.4883, lng: -0.1059, lines: ["Northern"] },
+  { name: "Nine Elms", lat: 51.4799, lng: -0.1284, lines: ["Northern"] },
+  { name: "Battersea Power Station", lat: 51.4797, lng: -0.1432, lines: ["Northern"] },
+  { name: "Borough", lat: 51.5011, lng: -0.0934, lines: ["Northern"] },
+  { name: "Moorgate", lat: 51.5186, lng: -0.0886, lines: ["Northern", "Circle", "Hammersmith & City", "Metropolitan", "Elizabeth line"] },
+  { name: "Old Street", lat: 51.5255, lng: -0.0874, lines: ["Northern"] },
+  { name: "Angel", lat: 51.5327, lng: -0.1061, lines: ["Northern"] },
+  { name: "Leicester Square", lat: 51.5113, lng: -0.1285, lines: ["Northern", "Piccadilly"] },
+  { name: "Goodge Street", lat: 51.5204, lng: -0.1347, lines: ["Northern"] },
+  { name: "Warren Street", lat: 51.5247, lng: -0.1381, lines: ["Northern", "Victoria"] },
+  { name: "Euston", lat: 51.5281, lng: -0.1336, lines: ["Northern", "Victoria", "London Overground"] },
+  { name: "Mornington Crescent", lat: 51.5342, lng: -0.1387, lines: ["Northern"] },
+  { name: "Camden Town", lat: 51.5392, lng: -0.1426, lines: ["Northern"] },
+  // High Barnet Branch
+  { name: "Chalk Farm", lat: 51.5441, lng: -0.1537, lines: ["Northern"] },
+  { name: "Belsize Park", lat: 51.5503, lng: -0.1697, lines: ["Northern"] },
+  { name: "Hampstead", lat: 51.5567, lng: -0.1783, lines: ["Northern"] },
+  { name: "Golders Green", lat: 51.5723, lng: -0.1942, lines: ["Northern"] },
+  { name: "Brent Cross", lat: 51.5768, lng: -0.2136, lines: ["Northern"] },
+  { name: "Hendon Central", lat: 51.5833, lng: -0.2265, lines: ["Northern"] },
+  { name: "Colindale", lat: 51.5954, lng: -0.2500, lines: ["Northern"] },
+  { name: "Burnt Oak", lat: 51.6028, lng: -0.2641, lines: ["Northern"] },
+  { name: "Edgware", lat: 51.6136, lng: -0.2749, lines: ["Northern"] },
+  // Edgware Branch
+  { name: "Kentish Town", lat: 51.5507, lng: -0.1402, lines: ["Northern"] },
+  { name: "Tufnell Park", lat: 51.5568, lng: -0.1354, lines: ["Northern"] },
+  { name: "Archway", lat: 51.5654, lng: -0.1348, lines: ["Northern"] },
+  { name: "Highgate", lat: 51.5768, lng: -0.1481, lines: ["Northern"] },
+  { name: "East Finchley", lat: 51.5873, lng: -0.1650, lines: ["Northern"] },
+  { name: "Finchley Central", lat: 51.6010, lng: -0.1923, lines: ["Northern"] },
+  { name: "West Finchley", lat: 51.6096, lng: -0.1884, lines: ["Northern"] },
+  { name: "Woodside Park", lat: 51.6181, lng: -0.1855, lines: ["Northern"] },
+  { name: "Totteridge & Whetstone", lat: 51.6307, lng: -0.1793, lines: ["Northern"] },
+  { name: "High Barnet", lat: 51.6505, lng: -0.1942, lines: ["Northern"] },
+  { name: "Mill Hill East", lat: 51.6085, lng: -0.2100, lines: ["Northern"] },
+
+  // === PICCADILLY ===
+  { name: "Cockfosters", lat: 51.6515, lng: -0.1492, lines: ["Piccadilly"] },
+  { name: "Oakwood", lat: 51.6474, lng: -0.1317, lines: ["Piccadilly"] },
+  { name: "Southgate", lat: 51.6322, lng: -0.1287, lines: ["Piccadilly"] },
+  { name: "Arnos Grove", lat: 51.6164, lng: -0.1332, lines: ["Piccadilly"] },
+  { name: "Bounds Green", lat: 51.6069, lng: -0.1243, lines: ["Piccadilly"] },
+  { name: "Wood Green", lat: 51.5973, lng: -0.1100, lines: ["Piccadilly"] },
+  { name: "Turnpike Lane", lat: 51.5905, lng: -0.1030, lines: ["Piccadilly"] },
+  { name: "Manor House", lat: 51.5707, lng: -0.0960, lines: ["Piccadilly"] },
+  { name: "Finsbury Park", lat: 51.5642, lng: -0.1064, lines: ["Victoria", "Piccadilly"] },
+  { name: "Arsenal", lat: 51.5585, lng: -0.1058, lines: ["Piccadilly"] },
+  { name: "Holloway Road", lat: 51.5529, lng: -0.1130, lines: ["Piccadilly"] },
+  { name: "Caledonian Road", lat: 51.5484, lng: -0.1187, lines: ["Piccadilly"] },
+  { name: "Russell Square", lat: 51.5230, lng: -0.1243, lines: ["Piccadilly"] },
+  { name: "Covent Garden", lat: 51.5130, lng: -0.1243, lines: ["Piccadilly"] },
+  { name: "Hyde Park Corner", lat: 51.5028, lng: -0.1527, lines: ["Piccadilly"] },
+  { name: "Knightsbridge", lat: 51.5015, lng: -0.1606, lines: ["Piccadilly"] },
+  { name: "Gloucester Road", lat: 51.4944, lng: -0.1830, lines: ["Piccadilly", "Circle", "District"] },
+  { name: "Acton Town", lat: 51.5030, lng: -0.2799, lines: ["Piccadilly", "District"] },
+  { name: "South Ealing", lat: 51.5011, lng: -0.3073, lines: ["Piccadilly"] },
+  { name: "Northfields", lat: 51.4996, lng: -0.3142, lines: ["Piccadilly"] },
+  { name: "Boston Manor", lat: 51.4955, lng: -0.3250, lines: ["Piccadilly"] },
+  { name: "Osterley", lat: 51.4813, lng: -0.3540, lines: ["Piccadilly"] },
+  { name: "Hounslow East", lat: 51.4735, lng: -0.3563, lines: ["Piccadilly"] },
+  { name: "Hounslow Central", lat: 51.4713, lng: -0.3667, lines: ["Piccadilly"] },
+  { name: "Hounslow West", lat: 51.4735, lng: -0.3833, lines: ["Piccadilly"] },
+  { name: "Hatton Cross", lat: 51.4667, lng: -0.4233, lines: ["Piccadilly"] },
+  { name: "Heathrow Terminal 4", lat: 51.4593, lng: -0.4449, lines: ["Piccadilly", "Elizabeth line"] },
+  { name: "Heathrow Terminals 2 & 3", lat: 51.4713, lng: -0.4524, lines: ["Piccadilly", "Elizabeth line"] },
+  { name: "Heathrow Terminal 5", lat: 51.4703, lng: -0.4897, lines: ["Piccadilly", "Elizabeth line"] },
+
+  // === VICTORIA ===
+  { name: "Walthamstow Central", lat: 51.5830, lng: -0.0198, lines: ["Victoria", "London Overground"] },
+  { name: "Blackhorse Road", lat: 51.5869, lng: -0.0411, lines: ["Victoria", "London Overground"] },
+  { name: "Tottenham Hale", lat: 51.5882, lng: -0.0594, lines: ["Victoria"] },
+  { name: "Seven Sisters", lat: 51.5822, lng: -0.0753, lines: ["Victoria", "London Overground"] },
+  { name: "Highbury & Islington", lat: 51.5463, lng: -0.1035, lines: ["Victoria", "London Overground"] },
+  { name: "Pimlico", lat: 51.4892, lng: -0.1334, lines: ["Victoria"] },
+  { name: "Vauxhall", lat: 51.4861, lng: -0.1253, lines: ["Victoria"] },
+  { name: "Brixton", lat: 51.4626, lng: -0.1147, lines: ["Victoria"] },
+
+  // === OTHER MAJOR ===
+  { name: "Shoreditch High Street", lat: 51.5234, lng: -0.0759, lines: ["London Overground"] },
+  { name: "Whitechapel", lat: 51.5194, lng: -0.0601, lines: ["District", "Hammersmith & City", "London Overground", "Elizabeth line"] },
+  { name: "Wapping", lat: 51.5042, lng: -0.0560, lines: ["London Overground"] },
+  { name: "Rotherhithe", lat: 51.5003, lng: -0.0519, lines: ["London Overground"] },
+  { name: "Surrey Quays", lat: 51.4931, lng: -0.0475, lines: ["London Overground"] },
+  { name: "New Cross", lat: 51.4764, lng: -0.0326, lines: ["London Overground"] },
+  { name: "New Cross Gate", lat: 51.4754, lng: -0.0401, lines: ["London Overground"] },
+  { name: "Clapham Junction", lat: 51.4651, lng: -0.1706, lines: ["London Overground"] }
 ];
 
 // Helper to find nearest
 function findStations({ lat, lng, radiusMeters }) {
   const matches = [];
   const R = 6371e3; // metres
-  
-  for (const s of STATIONS_DATA) {
-    const φ1 = lat * Math.PI/180;
-    const φ2 = s.lat * Math.PI/180;
-    const Δφ = (s.lat-lat) * Math.PI/180;
-    const Δλ = (s.lng-lng) * Math.PI/180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  for (const s of STATIONS_DATA) {
+    const φ1 = lat * Math.PI / 180;
+    const φ2 = s.lat * Math.PI / 180;
+    const Δφ = (s.lat - lat) * Math.PI / 180;
+    const Δλ = (s.lng - lng) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) *
+      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
 
     if (d <= radiusMeters) {
       matches.push({ ...s, dist: d });
     }
   }
-  
-  return matches.sort((a,b) => a.dist - b.dist);
+
+  return matches.sort((a, b) => a.dist - b.dist);
 }

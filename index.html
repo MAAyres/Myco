@@ -664,13 +664,13 @@
       // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
       // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
       // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
+      // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
       if ((!originPlace?.geometry || !destPlace?.geometry)) {
         try {
           const service = new google.maps.places.PlacesService(map);
-          const find = (query) => new Promise((resolve, reject) => {
+          const find = (query) => new Promise((resolve) => {
             if (!query) return resolve(null);
             service.findPlaceFromQuery({ query, fields: ['geometry', 'name', 'formatted_address'] }, (res, stat) => {
-              // PlacesServiceStatus.OK is the standard success
               if (stat === google.maps.places.PlacesServiceStatus.OK && res?.[0]) resolve(res[0]);
               else resolve(null);
             });
@@ -678,51 +678,78 @@
 
           if (!originPlace?.geometry) {
             const res = await find(el('origin').value);
-            if (res) {
-              originPlace = res;
-              setMarker('origin', originPlace.geometry.location);
-              map.panTo(originPlace.geometry.location);
-            } else {
-              throw new Error('Using Places API: Could not find Origin: ' + el('origin').value);
-            }
+            if (res) { originPlace = res; setMarker('origin', originPlace.geometry.location); map.panTo(originPlace.geometry.location); }
           }
           if (!destPlace?.geometry) {
             const res = await find(el('destination').value);
-            if (res) {
-              destPlace = res;
-              setMarker('dest', destPlace.geometry.location);
-            } else {
-              throw new Error('Using Places API: Could not find Destination: ' + el('destination').value);
-            }
+            if (res) { destPlace = res; setMarker('dest', destPlace.geometry.location); }
           }
-        } catch (e) { console.error(e); msg(e.message); return; }
+        } catch (e) { console.warn('Places fallback failed:', e); }
       }
 
-      const originLL = originPlace.geometry.location; const destLL = destPlace.geometry.location;
+      // FINAL RESORT: If we still lack geometry, we use "Directions API" to geocode for us.
+      // This is the "Double Pass" strategy.
+      const originStr = originPlace?.geometry ? `${originPlace.geometry.location.lat()},${originPlace.geometry.location.lng()}` : el('origin').value;
+      const destStr = destPlace?.geometry ? `${destPlace.geometry.location.lat()},${destPlace.geometry.location.lng()}` : el('destination').value;
 
-      // Fetch Weather for Origin
+      if (!originStr || !destStr) { msg('Please enter origin and destination.'); return; }
+
+      // 1. Initial Bike Check (Always needed, and gives us coords if we lack them!)
+      let bikeOD = null;
+      try {
+        bikeOD = await fetchDirections({ origin: originStr, destination: destStr, mode: 'BICYCLING' });
+
+        // HYDRATE COORDS from Directions response if missing!
+        if (!originPlace?.geometry || !destPlace?.geometry) {
+          const leg = bikeOD.routes?.[0]?.legs?.[0];
+          if (leg) {
+            if (!originPlace?.geometry) {
+              const loc = new google.maps.LatLng(leg.start_location.lat, leg.start_location.lng);
+              originPlace = { geometry: { location: loc }, name: leg.start_address, formatted_address: leg.start_address };
+              setMarker('origin', loc);
+              map.panTo(loc);
+            }
+            if (!destPlace?.geometry) {
+              const loc = new google.maps.LatLng(leg.end_location.lat, leg.end_location.lng);
+              destPlace = { geometry: { location: loc }, name: leg.end_address, formatted_address: leg.end_address };
+              setMarker('dest', loc);
+            }
+          }
+        }
+      } catch (e) { console.warn(e); }
+
+      // Now we (hopefully) have valid originPlace/destPlace geometry.
+      // If we STILL fail, we really can't do anything (route impossible).
+      if (!originPlace?.geometry || !destPlace?.geometry) { msg('Could not locate start or end point. Check spelling.'); return; }
+
+      const originLL = originPlace.geometry.location;
+      const destLL = destPlace.geometry.location;
+
+      // START OPTIMIZATION
       fetchWeather(originLL.lat(), originLL.lng());
 
-      // Local lookup instead of API
+      // Local lookup
       const originStations = findStations({ lat: originLL.lat(), lng: originLL.lng(), radiusMeters: maxCycleMeters });
       const destStations = findStations({ lat: destLL.lat(), lng: destLL.lng(), radiusMeters: maxCycleMeters });
 
-
-      // draw stations
-      // draw stations
       originStations.forEach((s) => addStationMarker({ lat: s.lat, lng: s.lng }, true));
       destStations.forEach((s) => addStationMarker({ lat: s.lat, lng: s.lng }, false));
 
       const candidates = [];
       const str = (ll) => `${ll.lat()},${ll.lng()}`;
 
-      // Bike-only
-      try {
-        const bikeOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'BICYCLING' });
-        const tBike = adjustCycleDuration(sumDurationREST(bikeOD));
-        const allowBikeOnly = !strictCap || (tBike <= maxCycleMin * 60);
-        if (allowBikeOnly) candidates.push({ kind: 'bike-only', totalSec: tBike, segments: [{ mode: 'BICYCLING', res: bikeOD }] });
-      } catch (e) { console.warn('Bike-only failed:', e.message); }
+      // Bike-only (Reuse result if we have it)
+      if (bikeOD) {
+        try {
+          const tBike = adjustCycleDuration(sumDurationREST(bikeOD));
+          const allowBikeOnly = !strictCap || (tBike <= maxCycleMin * 60);
+          if (allowBikeOnly) candidates.push({ kind: 'bike-only', totalSec: tBike, segments: [{ mode: 'BICYCLING', res: bikeOD }] });
+        } catch (e) { }
+      } else {
+        // Retry if first call failed (unlikely)
+      }
+
+
 
       // Transit-only
       try {

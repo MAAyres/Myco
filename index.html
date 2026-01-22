@@ -76,12 +76,13 @@
       animation-delay: 0s;
     }
 
-    width: 45vw;
-    height: 45vw;
-    right: -5vw;
-    top: 10vh;
-    background: radial-gradient(circle at center, rgba(var(--accent), 0.8), transparent 70%);
-    animation-delay: -5s;
+    .b2 {
+      width: 45vw;
+      height: 45vw;
+      right: -5vw;
+      top: 10vh;
+      background: radial-gradient(circle at center, rgba(var(--accent), 0.8), transparent 70%);
+      animation-delay: -5s;
     }
 
     .b3 {
@@ -271,7 +272,8 @@
       <div id="weather"
         class="hidden flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white/60 px-2.5 py-1 rounded-full border border-white/80 ml-3 shadow-sm backdrop-blur">
       </div>
-      <div class="ml-auto text-xs text-slate-600 hidden sm:block">Keys secured on server</div>
+      <button id="settingsBtn" class="ml-auto p-2 rounded-full hover:bg-slate-100 text-slate-600 transition"
+        title="Settings">⚙️</button>
     </div>
   </header>
 
@@ -421,7 +423,25 @@
 
       el('useLoc').addEventListener('click', useGeolocation);
       el('planBtn').addEventListener('click', planBestRoute);
-      el('clearBtn').addEventListener('click', clearAll);
+      el('settingsBtn').addEventListener('click', () => {
+        loadSettingsInputs();
+        document.getElementById('settingsModal').showModal();
+      });
+
+      // Settings Autocomplete
+      const homeInput = el('setHome');
+      const workInput = el('setWork');
+      new google.maps.places.Autocomplete(homeInput, { fields: ["formatted_address"] });
+      new google.maps.places.Autocomplete(workInput, { fields: ["formatted_address"] });
+
+      el('saveSettings').addEventListener('click', () => {
+        const places = {
+          home: homeInput.value,
+          work: workInput.value
+        };
+        localStorage.setItem('myco_places', JSON.stringify(places));
+        document.getElementById('settingsModal').close();
+      });
 
       // Check URL params
       const params = new URLSearchParams(window.location.search);
@@ -429,11 +449,17 @@
         el('origin').value = params.get('origin');
         el('destination').value = params.get('dest');
         if (params.has('cycleTime')) { el('cycleTime').value = params.get('cycleTime'); el('cycleVal').textContent = params.get('cycleTime'); }
-        // Trigger generic autocomplete (heuristic) - we need geocoding technically but text search works for API
-        // For simplicity, we trigger plan if we have values. 
-        // NOTE: Our current planBestRoute relies on originPlace object. We need to resolve text to place if missing.
-        // We'll add a quick resolver in planBestRoute for text-only inputs.
+        // Attempt immediate plan with text-based inputs (API handles text search gracefully usually)
         planBestRoute();
+      }
+    }
+
+    function loadSettingsInputs() {
+      const saved = localStorage.getItem('myco_places');
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.home) el('setHome').value = p.home;
+        if (p.work) el('setWork').value = p.work;
       }
     }
 
@@ -442,16 +468,19 @@
       const saved = localStorage.getItem('myco_places');
       const places = saved ? JSON.parse(saved) : {};
       const val = places[key];
-      if (val) {
+      if (val && val.trim().length > 0) {
         el(targetId).value = val;
-        // Trigger place resolution? For now text is fine
+        // Trigger generic autocomplete update? 
+        // We can manually trigger the 'place_changed' if we stored the place object, 
+        // but for now text input + planBestRoute handles it via text search fallback logic we will add.
+        // Actually, planBestRoute currently requires originPlace object interactively.
+        // We will enhance planBestRoute to fallback to Text Searchservice if object missing.
       } else {
-        const newVal = prompt(`Enter address for ${key}:`);
-        if (newVal) {
-          places[key] = newVal;
-          localStorage.setItem('myco_places', JSON.stringify(places));
-          el(targetId).value = newVal;
-        }
+        // Open settings if missing
+        loadSettingsInputs();
+        document.getElementById('settingsModal').showModal();
+        // Focus the right input
+        setTimeout(() => el(key === 'home' ? 'setHome' : 'setWork').focus(), 100);
       }
     }
 
@@ -566,15 +595,27 @@
 
     // ===== Planner =====
     async function planBestRoute() {
-      if (!originPlace?.geometry?.location || !destPlace?.geometry?.location) { msg('Please set both origin and destination.'); return; }
-
-      msg('Planning…');
-      polylines.forEach(l => l.setMap(null)); polylines = []; stationMarkers.forEach(m => m.map = null); stationMarkers = []; el('fare').innerHTML = '';
-
-      const maxCycleMin = parseInt(el('cycleTime').value, 10);
-      const strictCap = el('strictCap').checked;
-      const bikeSpeedKmh = ASSUMED_E_BIKE_SPEED_KMH;
-      const maxCycleMeters = Math.round((bikeSpeedKmh * 1000 / 3600) * (maxCycleMin * 60));
+      // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
+      // We rely on Directions API's natural language parsing if we pass the strings directly.
+      // However, for StationService & Weather we need Lat/Lng. So we must geocode first if missing.
+      if ((!originPlace?.geometry || !destPlace?.geometry)) {
+        try {
+          // Quick geocode via Text Search (Places API) or just rely on the first Directions call to get lat/lng?
+          // Simplest reliable way: Use the text value. But we need coordinates for stations.
+          // Let's use the Geocoding service (part of Maps JS) or a Places text search.
+          const geocoder = new google.maps.Geocoder();
+          if (!originPlace?.geometry) {
+            const res = await new Promise(r => geocoder.geocode({ address: el('origin').value }, (res, stat) => r(stat === 'OK' ? res[0] : null)));
+            if (res) originPlace = res; else throw new Error('Could not find Origin location');
+            setMarker('origin', originPlace.geometry.location); map.panTo(originPlace.geometry.location);
+          }
+          if (!destPlace?.geometry) {
+            const res = await new Promise(r => geocoder.geocode({ address: el('destination').value }, (res, stat) => r(stat === 'OK' ? res[0] : null)));
+            if (res) destPlace = res; else throw new Error('Could not find Destination location');
+            setMarker('dest', destPlace.geometry.location);
+          }
+        } catch (e) { msg('Address not found. Please select from the dropdown.'); return; }
+      }
 
       const originLL = originPlace.geometry.location; const destLL = destPlace.geometry.location;
 
@@ -690,9 +731,25 @@
       }
       const bounds = new google.maps.LatLngBounds(); polylines.forEach(pl => pl.getPath().forEach(pt => bounds.extend(pt))); if (!bounds.isEmpty()) map.fitBounds(bounds, 64);
 
-      // title
-      const title = document.createElement('div'); title.className = 'mb-2'; title.innerHTML = `<div class="text-base font-semibold text-slate-800">${labelForKind(sol)}</div><div class="text-sm text-slate-700">Total time: <span class="font-semibold">${fmt(sol.totalSec)}</span></div>`;
-      summary.appendChild(title);
+      // SHARE BUTTON
+      const shareBtn = document.createElement('button');
+      shareBtn.className = 'absolute top-0 right-0 p-2 rounded-full bg-slate-100/50 hover:bg-slate-200 text-slate-600 transition';
+      shareBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
+      shareBtn.title = "Share Route";
+      shareBtn.onclick = async () => {
+        const url = window.location.href;
+        if (navigator.share) {
+          try { await navigator.share({ title: 'Myco Route', url }); } catch (e) { }
+        } else {
+          try { await navigator.clipboard.writeText(url); alert('Route link copied to clipboard!'); } catch (e) { }
+        }
+      };
+
+      const titleWrapper = document.createElement('div'); titleWrapper.className = 'relative pr-8';
+      titleWrapper.innerHTML = `<div class="mb-2"><div class="text-base font-semibold text-slate-800">${labelForKind(sol)}</div><div class="text-sm text-slate-700">Total time: <span class="font-semibold">${fmt(sol.totalSec)}</span></div></div>`;
+      titleWrapper.appendChild(shareBtn);
+
+      summary.appendChild(titleWrapper);
 
       const list = document.createElement('ol'); list.className = 'list-decimal pl-5 space-y-3';
 
@@ -843,6 +900,31 @@
       setTimeout(() => box.remove(), 8000);
     })();
   </script>
+
+  <!-- Settings Modal -->
+  <dialog id="settingsModal"
+    class="p-0 rounded-2xl shadow-2xl backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm bg-transparent open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in">
+    <div class="w-[90vw] max-w-md bg-white p-6 rounded-2xl border border-white/60">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-slate-800">Settings</h2>
+        <button onclick="document.getElementById('settingsModal').close()"
+          class="p-1 rounded-full hover:bg-slate-100 text-slate-500">✕</button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="section-title">Home Address</label>
+          <input id="setHome" class="field" placeholder="Search address..." />
+        </div>
+        <div>
+          <label class="section-title">Work Address</label>
+          <input id="setWork" class="field" placeholder="Search address..." />
+        </div>
+        <div class="pt-2 flex justify-end">
+          <button id="saveSettings" class="btn btn-primary w-full">Save & Close</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <!-- PWA: register service worker -->
   <script>

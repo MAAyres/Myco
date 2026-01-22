@@ -246,6 +246,11 @@
       opacity: .2;
       pointer-events: none;
     }
+
+    /* Fix Google Maps Autocomplete z-index */
+    .pac-container {
+      z-index: 10000 !important;
+    }
   </style>
   <script src="stations.js"></script>
 </head>

@@ -607,24 +607,17 @@
       // We rely on Directions API's natural language parsing if we pass the strings directly.
       // However, for StationService & Weather we need Lat/Lng. So we must geocode first if missing.
       // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
+      // Fallback: If place objects missing (e.g. from URL/Saved Place), use text inputs directly.
       if ((!originPlace?.geometry || !destPlace?.geometry)) {
         try {
-          const service = new google.maps.places.PlacesService(map);
-          const find = (query) => new Promise((resolve, reject) => {
-            if (!query) return resolve(null);
-            service.findPlaceFromQuery({ query, fields: ['geometry', 'name', 'formatted_address'] }, (res, stat) => {
-              if (stat === google.maps.places.PlacesServiceStatus.OK && res?.[0]) resolve(res[0]);
-              else resolve(null);
-            });
-          });
-
+          const geocoder = new google.maps.Geocoder();
           if (!originPlace?.geometry) {
-            const res = await find(el('origin').value);
+            const res = await new Promise(r => geocoder.geocode({ address: el('origin').value }, (res, stat) => r(stat === 'OK' ? res[0] : null)));
             if (res) originPlace = res; else throw new Error('Could not find Origin: ' + el('origin').value);
             setMarker('origin', originPlace.geometry.location); map.panTo(originPlace.geometry.location);
           }
           if (!destPlace?.geometry) {
-            const res = await find(el('destination').value);
+            const res = await new Promise(r => geocoder.geocode({ address: el('destination').value }, (res, stat) => r(stat === 'OK' ? res[0] : null)));
             if (res) destPlace = res; else throw new Error('Could not find Destination: ' + el('destination').value);
             setMarker('dest', destPlace.geometry.location);
           }

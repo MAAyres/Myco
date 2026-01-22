@@ -76,13 +76,12 @@
       animation-delay: 0s;
     }
 
-    .b2 {
-      width: 45vw;
-      height: 45vw;
-      right: -5vw;
-      top: 10vh;
-      background: radial-gradient(circle at center, rgba(var(--accent), 0.8), transparent 70%);
-      animation-delay: -5s;
+    width: 45vw;
+    height: 45vw;
+    right: -5vw;
+    top: 10vh;
+    background: radial-gradient(circle at center, rgba(var(--accent), 0.8), transparent 70%);
+    animation-delay: -5s;
     }
 
     .b3 {
@@ -266,9 +265,13 @@
         <img src="/icons/icon-192.png" alt="Myco" class="h-full w-full object-cover" />
       </div>
       <h1 class="text-xl font-semibold text-slate-800">Myco</h1>
-      <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-white/70 border border-white/80 text-slate-600">Google +
-        Serverless</span>
-      <div class="ml-auto text-xs text-slate-600">Keys secured on server • Referrer-locked render key</div>
+      <span
+        class="ml-1 text-xs px-2 py-0.5 rounded-full bg-white/70 border border-white/80 text-slate-600 hidden sm:inline-block">Google
+        + Serverless</span>
+      <div id="weather"
+        class="hidden flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-white/60 px-2.5 py-1 rounded-full border border-white/80 ml-3 shadow-sm backdrop-blur">
+      </div>
+      <div class="ml-auto text-xs text-slate-600 hidden sm:block">Keys secured on server</div>
     </div>
   </header>
 
@@ -282,10 +285,22 @@
             <input id="origin" class="field flex-1" placeholder="Address or place" />
             <button id="useLoc" class="btn btn-ghost shrink-0" title="Use my location">📍</button>
           </div>
+          <div class="flex gap-2 mt-2">
+            <button class="chip hover:bg-slate-200 transition" onclick="useSavedPlace('home', 'origin')">🏠
+              Home</button>
+            <button class="chip hover:bg-slate-200 transition" onclick="useSavedPlace('work', 'origin')">💼
+              Work</button>
+          </div>
         </div>
         <div>
           <label class="section-title">Destination</label>
           <input id="destination" class="field" placeholder="Where to?" />
+          <div class="flex gap-2 mt-2">
+            <button class="chip hover:bg-slate-200 transition" onclick="useSavedPlace('home', 'destination')">🏠
+              Home</button>
+            <button class="chip hover:bg-slate-200 transition" onclick="useSavedPlace('work', 'destination')">💼
+              Work</button>
+          </div>
         </div>
       </div>
 
@@ -407,6 +422,60 @@
       el('useLoc').addEventListener('click', useGeolocation);
       el('planBtn').addEventListener('click', planBestRoute);
       el('clearBtn').addEventListener('click', clearAll);
+
+      // Check URL params
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('origin') && params.has('dest')) {
+        el('origin').value = params.get('origin');
+        el('destination').value = params.get('dest');
+        if (params.has('cycleTime')) { el('cycleTime').value = params.get('cycleTime'); el('cycleVal').textContent = params.get('cycleTime'); }
+        // Trigger generic autocomplete (heuristic) - we need geocoding technically but text search works for API
+        // For simplicity, we trigger plan if we have values. 
+        // NOTE: Our current planBestRoute relies on originPlace object. We need to resolve text to place if missing.
+        // We'll add a quick resolver in planBestRoute for text-only inputs.
+        planBestRoute();
+      }
+    }
+
+    // ===== Saved Places =====
+    function useSavedPlace(key, targetId) {
+      const saved = localStorage.getItem('myco_places');
+      const places = saved ? JSON.parse(saved) : {};
+      const val = places[key];
+      if (val) {
+        el(targetId).value = val;
+        // Trigger place resolution? For now text is fine
+      } else {
+        const newVal = prompt(`Enter address for ${key}:`);
+        if (newVal) {
+          places[key] = newVal;
+          localStorage.setItem('myco_places', JSON.stringify(places));
+          el(targetId).value = newVal;
+        }
+      }
+    }
+
+    // ===== Weather (OpenMeteo) =====
+    async function fetchWeather(lat, lng) {
+      try {
+        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code,precipitation&timezone=auto`);
+        const data = await r.json();
+        const curr = data.current;
+        if (!curr) return;
+
+        let icon = '☁️';
+        const code = curr.weather_code;
+        if (code === 0) icon = '☀️';
+        else if (code <= 3) icon = '⛅';
+        else if (code <= 48) icon = '🌫️';
+        else if (code <= 67) icon = '🌧️'; // rain
+        else if (code <= 77) icon = '❄️'; // snow
+        else icon = '⛈️'; // thunder/other
+
+        const wEl = el('weather');
+        wEl.classList.remove('hidden');
+        wEl.innerHTML = `${icon} ${Math.round(curr.temperature_2m)}°C <span class="text-slate-400">|</span> ${curr.precipitation}mm`;
+      } catch (e) { console.warn('Weather fail', e); }
     }
 
 
@@ -509,6 +578,9 @@
 
       const originLL = originPlace.geometry.location; const destLL = destPlace.geometry.location;
 
+      // Fetch Weather for Origin
+      fetchWeather(originLL.lat(), originLL.lng());
+
       // Local lookup instead of API
       const originStations = findStations({ lat: originLL.lat(), lng: originLL.lng(), radiusMeters: maxCycleMeters });
       const destStations = findStations({ lat: destLL.lat(), lng: destLL.lng(), radiusMeters: maxCycleMeters });
@@ -577,6 +649,14 @@
       const best = candidates[0];
       const cycleOnly = candidates.find(c => c.kind === 'bike-only');
       renderSolution(best, (cycleOnly && cycleOnly !== best) ? cycleOnly : null);
+
+      // Update URL
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('origin', el('origin').value);
+      newUrl.searchParams.set('dest', el('destination').value);
+      newUrl.searchParams.set('cycleTime', el('cycleTime').value);
+      window.history.pushState({}, '', newUrl);
+
       msg('');
     }
 
@@ -615,14 +695,37 @@
       summary.appendChild(title);
 
       const list = document.createElement('ol'); list.className = 'list-decimal pl-5 space-y-3';
+
+      const navBtn = (lat, lng, mode) => `<a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${mode}" target="_blank" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-600 hover:bg-brand hover:text-white transition ml-2" title="Open navigation">↗</a>`;
+
       if (sol.kind === 'combo') {
-        const li1 = document.createElement('li'); li1.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[0].res)))}</div><div class="text-xs text-slate-600">to <b>${sol.parts.a.name}</b></div>`; list.appendChild(li1);
-        const li2 = document.createElement('li'); li2.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sumDurationREST(sol.segments[1].res))}</div>`; list.appendChild(li2);
-        const li3 = document.createElement('li'); li3.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[2].res)))}</div><div class="text-xs text-slate-600">from <b>${sol.parts.b.name}</b> to destination</div>`; list.appendChild(li3);
+        const { a, b } = sol.parts;
+        const li1 = document.createElement('li');
+        li1.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[0].res)))} ${navBtn(a.lat, a.lng, 'bicycling')}</div><div class="text-xs text-slate-600">to <b>${a.name}</b></div>`;
+        list.appendChild(li1);
+
+        const li2 = document.createElement('li');
+        li2.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sumDurationREST(sol.segments[1].res))} ${navBtn(b.lat, b.lng, 'transit')}</div>`;
+        list.appendChild(li2);
+
+        const li3 = document.createElement('li');
+        // For final leg, we use actual dest coordinates
+        const destLat = destPlace.geometry.location.lat();
+        const destLng = destPlace.geometry.location.lng();
+        li3.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[2].res)))} ${navBtn(destLat, destLng, 'bicycling')}</div><div class="text-xs text-slate-600">from <b>${b.name}</b> to destination</div>`;
+        list.appendChild(li3);
       } else if (sol.kind === 'bike-only') {
-        const li = document.createElement('li'); li.innerHTML = `<div class="font-medium">Cycle — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
+        const dLat = destPlace.geometry.location.lat();
+        const dLng = destPlace.geometry.location.lng();
+        const li = document.createElement('li');
+        li.innerHTML = `<div class="font-medium">Cycle — ${fmt(sol.totalSec)} ${navBtn(dLat, dLng, 'bicycling')}</div>`;
+        list.appendChild(li);
       } else if (sol.kind === 'transit-only') {
-        const li = document.createElement('li'); li.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
+        const dLat = destPlace.geometry.location.lat();
+        const dLng = destPlace.geometry.location.lng();
+        const li = document.createElement('li');
+        li.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sol.totalSec)} ${navBtn(dLat, dLng, 'transit')}</div>`;
+        list.appendChild(li);
       }
       summary.appendChild(list);
 

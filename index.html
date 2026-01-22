@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,32 +11,68 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --bg-1: 255 241 242; --brand: 139 92 246; --accent: 16 185 129; --hot: 249 115 22; }
-    html, body { height: 100%; }
-    body { font-family: Inter, ui-sans-serif, system-ui; background: rgb(var(--bg-1)); }
-    #map { height: 100%; min-height: 420px; border-radius: 2rem; overflow: hidden; }
-    @media (max-width: 640px){ #map { height: 60vh; min-height: 60vh; } }
-    .blob-wrap { position: fixed; inset: -10% -10% auto -10%; z-index: 0; filter: blur(40px); pointer-events: none; }
-    .blob { position: absolute; border-radius: 9999px; opacity: .35; mix-blend: multiply; }
-    .b1 { width: 38vmax; height: 38vmax; left: -6vmax; top: -6vmax; background: radial-gradient(closest-side, rgba(var(--brand), .9), rgba(var(--brand), 0)); }
-    .b2 { width: 32vmax; height: 32vmax; right: 8vmax; top: -4vmax; background: radial-gradient(closest-side, rgba(var(--accent), .9), rgba(var(--accent), 0)); }
-    .b3 { width: 36vmax; height: 36vmax; left: 20vmax; top: 22vmax; background: radial-gradient(closest-side, rgba(var(--hot), .9), rgba(var(--hot), 0)); }
-    .glass { backdrop-filter: blur(8px); background: rgba(255, 255, 255, .7); border-radius: 2rem; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:999px; padding:.75rem 1.25rem; font-size:1rem; font-weight:500; transition:.15s; box-shadow:0 1px 2px rgba(0,0,0,.06); }
-    .btn-primary { background: linear-gradient(135deg, rgb(var(--brand)) 0%, rgb(var(--accent)) 100%); color: #fff; }
-    .btn-ghost { border:1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.65); }
-    .card { border-radius: 1.5rem; border:1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.7); box-shadow:0 8px 24px rgba(0,0,0,.08); }
-    .header-card { background: #fff; border: 1px solid rgba(226, 232, 240, .8); }
-    .field { width:100%; border-radius:999px; border:1px solid rgba(148,163,184,.6); padding:.75rem 1.25rem; font-size:1rem; outline:none; box-shadow:0 0 0 0 rgba(139,92,246,.3); }
-    .field:focus { box-shadow: 0 0 0 6px rgba(139,92,246,.15); }
-    .section-title { font-size:.75rem; font-weight:600; color:#334155; text-transform:uppercase; letter-spacing:.06em; }
-    .chip { display:inline-flex; align-items:center; gap:.4rem; font-size:.75rem; padding:.25rem .6rem; border-radius:999px; border:1px solid rgb(255 255 255 / .8); background:rgb(255 255 255 / .8); }
-    .slider { -webkit-appearance: none; width: 100%; height: 0.75rem; background: rgba(255,255,255,.8); border-radius: 999px; outline: none; border: 1px solid rgba(148,163,184,.35); }
-    .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 1.25rem; height: 1.25rem; border-radius: 999px; background: linear-gradient(135deg, rgb(var(--brand)) 0%, rgb(var(--accent)) 100%); border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,.15); cursor: pointer; }
-    .slider::-moz-range-thumb { width: 1.25rem; height: 1.25rem; border-radius: 999px; background: linear-gradient(135deg, rgb(var(--brand)) 0%, rgb(var(--accent)) 100%); border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,.15); cursor: pointer; }
-    .corner-mark { position: fixed; right: 14px; bottom: 14px; width: 84px; height: 84px; opacity: .35; pointer-events: none; filter: drop-shadow(0 6px 12px rgba(0,0,0,.12)); }
+    :root {
+      --bg-1: 255 241 242;
+      --brand: 139 92 246;
+      --accent: 16 185 129;
+      --hot: 249 115 22;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui;
+      background: rgb(var(--bg-1));
+    }
+
+    #map {
+      height: 100%;
+      min-height: 420px;
+      border-radius: 2rem;
+      overflow: hidden;
+    }
   </style>
+  <script src="stations.js"></script>
 </head>
+
+.blob-wrap { position: fixed; inset: -10% -10% auto -10%; z-index: 0; filter: blur(40px); pointer-events: none; }
+.blob { position: absolute; border-radius: 9999px; opacity: .35; mix-blend: multiply; }
+.b1 { width: 38vmax; height: 38vmax; left: -6vmax; top: -6vmax; background: radial-gradient(closest-side,
+rgba(var(--brand), .9), rgba(var(--brand), 0)); }
+.b2 { width: 32vmax; height: 32vmax; right: 8vmax; top: -4vmax; background: radial-gradient(closest-side,
+rgba(var(--accent), .9), rgba(var(--accent), 0)); }
+.b3 { width: 36vmax; height: 36vmax; left: 20vmax; top: 22vmax; background: radial-gradient(closest-side,
+rgba(var(--hot), .9), rgba(var(--hot), 0)); }
+.glass { backdrop-filter: blur(8px); background: rgba(255, 255, 255, .7); border-radius: 2rem; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:999px; padding:.75rem
+1.25rem; font-size:1rem; font-weight:500; transition:.15s; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.btn-primary { background: linear-gradient(135deg, rgb(var(--brand)) 0%, rgb(var(--accent)) 100%); color: #fff; }
+.btn-ghost { border:1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.65); }
+.card { border-radius: 1.5rem; border:1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.7); box-shadow:0 8px
+24px rgba(0,0,0,.08); }
+.header-card { background: #fff; border: 1px solid rgba(226, 232, 240, .8); }
+.field { width:100%; border-radius:999px; border:1px solid rgba(148,163,184,.6); padding:.75rem 1.25rem; font-size:1rem;
+outline:none; box-shadow:0 0 0 0 rgba(139,92,246,.3); }
+.field:focus { box-shadow: 0 0 0 6px rgba(139,92,246,.15); }
+.section-title { font-size:.75rem; font-weight:600; color:#334155; text-transform:uppercase; letter-spacing:.06em; }
+.chip { display:inline-flex; align-items:center; gap:.4rem; font-size:.75rem; padding:.25rem .6rem; border-radius:999px;
+border:1px solid rgb(255 255 255 / .8); background:rgb(255 255 255 / .8); }
+.slider { -webkit-appearance: none; width: 100%; height: 0.75rem; background: rgba(255,255,255,.8); border-radius:
+999px; outline: none; border: 1px solid rgba(148,163,184,.35); }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 1.25rem; height: 1.25rem;
+border-radius: 999px; background: linear-gradient(135deg, rgb(var(--brand)) 0%, rgb(var(--accent)) 100%); border: 2px
+solid white; box-shadow: 0 4px 10px rgba(0,0,0,.15); cursor: pointer; }
+.slider::-moz-range-thumb { width: 1.25rem; height: 1.25rem; border-radius: 999px; background: linear-gradient(135deg,
+rgb(var(--brand)) 0%, rgb(var(--accent)) 100%); border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,.15); cursor:
+pointer; }
+.corner-mark { position: fixed; right: 14px; bottom: 14px; width: 84px; height: 84px; opacity: .35; pointer-events:
+none; filter: drop-shadow(0 6px 12px rgba(0,0,0,.12)); }
+</style>
+</head>
+
 <body>
   <!-- Blobby bg -->
   <div class="blob-wrap" aria-hidden="true">
@@ -52,7 +89,8 @@
         <img src="/icons/icon-192.png" alt="Myco" class="h-full w-full object-cover" />
       </div>
       <h1 class="text-xl font-semibold text-slate-800">Myco</h1>
-      <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-white/70 border border-white/80 text-slate-600">Google + Serverless</span>
+      <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-white/70 border border-white/80 text-slate-600">Google +
+        Serverless</span>
       <div class="ml-auto text-xs text-slate-600">Keys secured on server • Referrer-locked render key</div>
     </div>
   </header>
@@ -113,16 +151,16 @@
   <!-- Corner watermark -->
   <svg class="corner-mark" viewBox="0 0 200 200" aria-hidden="true">
     <g stroke="#8B5CF6" stroke-width="2" fill="none" opacity="0.55">
-      <path d="M100 190 C95 150 95 140 70 120 M100 190 C105 150 110 140 130 120"/>
-      <path d="M70 120 C60 110 55 95 45 85 M70 120 C75 95 80 85 90 75"/>
-      <path d="M130 120 C140 105 150 95 165 90 M130 120 C122 98 118 90 110 80"/>
-      <circle cx="100" cy="190" r="5" fill="#10B981" stroke="white" stroke-width="3"/>
-      <circle cx="70" cy="120" r="4" fill="#10B981" stroke="white" stroke-width="2"/>
-      <circle cx="130" cy="120" r="4" fill="#10B981" stroke="white" stroke-width="2"/>
-      <circle cx="45" cy="85" r="3" fill="#10B981" stroke="white" stroke-width="2"/>
-      <circle cx="90" cy="75" r="3" fill="#10B981" stroke="white" stroke-width="2"/>
-      <circle cx="165" cy="90" r="3" fill="#10B981" stroke="white" stroke-width="2"/>
-      <circle cx="110" cy="80" r="3" fill="#10B981" stroke="white" stroke-width="2"/>
+      <path d="M100 190 C95 150 95 140 70 120 M100 190 C105 150 110 140 130 120" />
+      <path d="M70 120 C60 110 55 95 45 85 M70 120 C75 95 80 85 90 75" />
+      <path d="M130 120 C140 105 150 95 165 90 M130 120 C122 98 118 90 110 80" />
+      <circle cx="100" cy="190" r="5" fill="#10B981" stroke="white" stroke-width="3" />
+      <circle cx="70" cy="120" r="4" fill="#10B981" stroke="white" stroke-width="2" />
+      <circle cx="130" cy="120" r="4" fill="#10B981" stroke="white" stroke-width="2" />
+      <circle cx="45" cy="85" r="3" fill="#10B981" stroke="white" stroke-width="2" />
+      <circle cx="90" cy="75" r="3" fill="#10B981" stroke="white" stroke-width="2" />
+      <circle cx="165" cy="90" r="3" fill="#10B981" stroke="white" stroke-width="2" />
+      <circle cx="110" cy="80" r="3" fill="#10B981" stroke="white" stroke-width="2" />
     </g>
   </svg>
 
@@ -141,24 +179,24 @@
     const BIKE_TIME_MODIFIER = GOOGLE_BASE_CYCLING_SPEED_KMH / ASSUMED_E_BIKE_SPEED_KMH;
 
     const LINE_COLOURS = {
-      'Bakerloo':'#B36305','Central':'#E32017','Circle':'#FFD300','District':'#00782A','Hammersmith & City':'#F3A9BB','Jubilee':'#A0A5A9','Metropolitan':'#9B0056','Northern':'#000000','Piccadilly':'#003688','Victoria':'#0098D4','Waterloo & City':'#95CDBA','DLR':'#00A4A7','London Overground':'#EE7C0E','Elizabeth line':'#6950A1','Tram':'#009999','Bus':'#CC0000'
+      'Bakerloo': '#B36305', 'Central': '#E32017', 'Circle': '#FFD300', 'District': '#00782A', 'Hammersmith & City': '#F3A9BB', 'Jubilee': '#A0A5A9', 'Metropolitan': '#9B0056', 'Northern': '#000000', 'Piccadilly': '#003688', 'Victoria': '#0098D4', 'Waterloo & City': '#95CDBA', 'DLR': '#00A4A7', 'London Overground': '#EE7C0E', 'Elizabeth line': '#6950A1', 'Tram': '#009999', 'Bus': '#CC0000'
     };
 
     // Slider live badge
-    (function(){ const s=el('cycleTime'), o=el('cycleVal'); const sync=()=>o.textContent=s.value; s.addEventListener('input',sync); sync(); })();
+    (function () { const s = el('cycleTime'), o = el('cycleVal'); const sync = () => o.textContent = s.value; s.addEventListener('input', sync); sync(); })();
 
     // ===== Bootstrap: load key then Maps JS (with places, geometry, marker) =====
-    (async function bootstrap(){
+    (async function bootstrap() {
       try {
-        const env = await fetch('/api/env').then(r=>r.json()).catch(()=>({ mapsJsKey:null }));
+        const env = await fetch('/api/env').then(r => r.json()).catch(() => ({ mapsJsKey: null }));
         const key = env.mapsJsKey || null;
         if (!key) { msg('Maps key not configured. Set NEXT_PUBLIC_MAPS_JS_KEY in Vercel and redeploy.'); return; }
         await loadGoogleMaps(key);
         initAfterMapsLoad();
-      } catch (e) { console.error(e); msg('Failed to load Maps: '+ e.message); }
+      } catch (e) { console.error(e); msg('Failed to load Maps: ' + e.message); }
     })();
 
-    function loadGoogleMaps(key){
+    function loadGoogleMaps(key) {
       return new Promise((resolve, reject) => {
         const s = document.createElement('script');
         // include marker library for AdvancedMarkerElement
@@ -169,16 +207,16 @@
       });
     }
 
-    function initAfterMapsLoad(){
+    function initAfterMapsLoad() {
       map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 51.5074, lng: -0.1278 }, zoom: 11, mapTypeControl:false, streetViewControl:false, fullscreenControl:false,
-        styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ]
+        center: { lat: 51.5074, lng: -0.1278 }, zoom: 11, mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
+        styles: [{ featureType: 'poi', stylers: [{ visibility: 'off' }] }]
       });
 
       const originInput = el('origin');
       const destInput = el('destination');
-      const originAC = new google.maps.places.Autocomplete(originInput, { fields: ["geometry","name","formatted_address"] });
-      const destAC   = new google.maps.places.Autocomplete(destInput,   { fields: ["geometry","name","formatted_address"] });
+      const originAC = new google.maps.places.Autocomplete(originInput, { fields: ["geometry", "name", "formatted_address"] });
+      const destAC = new google.maps.places.Autocomplete(destInput, { fields: ["geometry", "name", "formatted_address"] });
 
       originAC.addListener('place_changed', () => {
         originPlace = originAC.getPlace();
@@ -194,38 +232,38 @@
       el('clearBtn').addEventListener('click', clearAll);
     }
 
-    
+
     // ===== Classic markers (no Map ID needed) =====
-function iconCircle(color, scale, stroke=2) {
-  return {
-    path: google.maps.SymbolPath.CIRCLE,
-    scale,
-    fillColor: color,
-    fillOpacity: 1,
-    strokeWeight: stroke,
-    strokeColor: '#ffffff'
-  };
-}
+    function iconCircle(color, scale, stroke = 2) {
+      return {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeWeight: stroke,
+        strokeColor: '#ffffff'
+      };
+    }
 
-function setMarker(kind, latLng){
-  const color = kind === 'origin' ? '#34d399' : '#fbbf24';
-  if (kind === 'origin') {
-    if (originMarker) originMarker.setMap(null);
-    originMarker = new google.maps.Marker({ map, position: latLng, icon: iconCircle(color, 10, 3), title: kind });
-  } else {
-    if (destMarker) destMarker.setMap(null);
-    destMarker = new google.maps.Marker({ map, position: latLng, icon: iconCircle(color, 10, 3), title: kind });
-  }
-}
+    function setMarker(kind, latLng) {
+      const color = kind === 'origin' ? '#34d399' : '#fbbf24';
+      if (kind === 'origin') {
+        if (originMarker) originMarker.setMap(null);
+        originMarker = new google.maps.Marker({ map, position: latLng, icon: iconCircle(color, 10, 3), title: kind });
+      } else {
+        if (destMarker) destMarker.setMap(null);
+        destMarker = new google.maps.Marker({ map, position: latLng, icon: iconCircle(color, 10, 3), title: kind });
+      }
+    }
 
-function addStationMarker(position, isOriginSide){
-  const color = isOriginSide ? '#06b6d4' : '#f59e0b';
-  const m = new google.maps.Marker({ map, position, icon: iconCircle(color, 6, 2) });
-  stationMarkers.push(m);
-}
+    function addStationMarker(position, isOriginSide) {
+      const color = isOriginSide ? '#06b6d4' : '#f59e0b';
+      const m = new google.maps.Marker({ map, position, icon: iconCircle(color, 6, 2) });
+      stationMarkers.push(m);
+    }
 
     // ===== Geolocation helper =====
-    function useGeolocation(){
+    function useGeolocation() {
       if (!navigator.geolocation) { msg('Geolocation not supported.'); return; }
       navigator.geolocation.getCurrentPosition((pos) => {
         const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -236,17 +274,17 @@ function addStationMarker(position, isOriginSide){
     }
 
     // ===== Clear =====
-    function clearAll(){
-      originPlace = destPlace = null; el('origin').value = ''; el('destination').value='';
+    function clearAll() {
+      originPlace = destPlace = null; el('origin').value = ''; el('destination').value = '';
       if (originMarker) originMarker.map = null; if (destMarker) destMarker.map = null;
-      originMarker=destMarker=null;
-      polylines.forEach(l=>l.setMap(null)); polylines=[];
-      stationMarkers.forEach(m=>m.map=null); stationMarkers=[];
-      el('summary').innerHTML=''; el('fare').innerHTML=''; msg('');
+      originMarker = destMarker = null;
+      polylines.forEach(l => l.setMap(null)); polylines = [];
+      stationMarkers.forEach(m => m.map = null); stationMarkers = [];
+      el('summary').innerHTML = ''; el('fare').innerHTML = ''; msg('');
     }
 
     // ===== Serverless fetchers =====
-    async function fetchDirections({ origin, destination, mode, transitModes }){
+    async function fetchDirections({ origin, destination, mode, transitModes }) {
       const params = new URLSearchParams({ origin, destination, mode });
       if (mode === 'TRANSIT' && transitModes?.length) params.set('transitModes', transitModes.join('|')); // pipe-separated
       const r = await fetch(`/api/directions?${params.toString()}`);
@@ -258,56 +296,51 @@ function addStationMarker(position, isOriginSide){
       return json; // Google Directions REST JSON
     }
 
-    async function fetchNearbyStations({ lat, lng, radius }){
+    async function fetchNearbyStations({ lat, lng, radius }) {
       // subway + train (tube/rail)
       const q1 = new URLSearchParams({ lat, lng, radius: String(radius), type: 'subway_station' }).toString();
       const q2 = new URLSearchParams({ lat, lng, radius: String(radius), type: 'train_station' }).toString();
-      const [aRes, bRes] = await Promise.all([ fetch(`/api/places-nearby?${q1}`), fetch(`/api/places-nearby?${q2}`) ]);
+      const [aRes, bRes] = await Promise.all([fetch(`/api/places-nearby?${q1}`), fetch(`/api/places-nearby?${q2}`)]);
       const a = await aRes.json(); const b = await bRes.json();
-      if ((!aRes.ok || (a.status && a.status!=='OK' && a.status!=='ZERO_RESULTS')) &&
-          (!bRes.ok || (b.status && b.status!=='OK' && b.status!=='ZERO_RESULTS'))) {
+      if ((!aRes.ok || (a.status && a.status !== 'OK' && a.status !== 'ZERO_RESULTS')) &&
+        (!bRes.ok || (b.status && b.status !== 'OK' && b.status !== 'ZERO_RESULTS'))) {
         const em = a?.error_message || b?.error_message || 'Places nearby error';
         throw new Error(em);
       }
-      const take = (json) => (json.results||[]).map(p => ({
+      const take = (json) => (json.results || []).map(p => ({
         id: p.place_id, name: p.name,
         location: new google.maps.LatLng(p.geometry.location.lat, p.geometry.location.lng)
       }));
       const all = [...take(a), ...take(b)];
-      const dedup = Object.values(all.reduce((acc, s)=>{ acc[s.id]=s; return acc; }, {}));
+      const dedup = Object.values(all.reduce((acc, s) => { acc[s.id] = s; return acc; }, {}));
       const base = new google.maps.LatLng(lat, lng);
-      dedup.sort((x,y)=> google.maps.geometry.spherical.computeDistanceBetween(x.location, base) - google.maps.geometry.spherical.computeDistanceBetween(y.location, base));
-      return dedup.slice(0,6);
+      dedup.sort((x, y) => google.maps.geometry.spherical.computeDistanceBetween(x.location, base) - google.maps.geometry.spherical.computeDistanceBetween(y.location, base));
+      return dedup.slice(0, 6);
     }
 
     // ===== Planner =====
-    async function planBestRoute(){
+    async function planBestRoute() {
       if (!originPlace?.geometry?.location || !destPlace?.geometry?.location) { msg('Please set both origin and destination.'); return; }
 
       msg('Planning…');
-      polylines.forEach(l=>l.setMap(null)); polylines=[]; stationMarkers.forEach(m=>m.map=null); stationMarkers=[]; el('fare').innerHTML='';
+      polylines.forEach(l => l.setMap(null)); polylines = []; stationMarkers.forEach(m => m.map = null); stationMarkers = []; el('fare').innerHTML = '';
 
-      const maxCycleMin = parseInt(el('cycleTime').value,10);
+      const maxCycleMin = parseInt(el('cycleTime').value, 10);
       const strictCap = el('strictCap').checked;
       const bikeSpeedKmh = ASSUMED_E_BIKE_SPEED_KMH;
       const maxCycleMeters = Math.round((bikeSpeedKmh * 1000 / 3600) * (maxCycleMin * 60));
 
       const originLL = originPlace.geometry.location; const destLL = destPlace.geometry.location;
 
-      let originStations = [], destStations = [];
-      try {
-        [originStations, destStations] = await Promise.all([
-          fetchNearbyStations({ lat: originLL.lat(), lng: originLL.lng(), radius: maxCycleMeters }),
-          fetchNearbyStations({ lat: destLL.lat(), lng: destLL.lng(), radius: maxCycleMeters })
-        ]);
-      } catch (e) {
-        console.warn('Places error:', e);
-        msg('Places error: ' + e.message);
-      }
+      // Local lookup instead of API
+      const originStations = findStations({ lat: originLL.lat(), lng: originLL.lng(), radiusMeters: maxCycleMeters });
+      const destStations = findStations({ lat: destLL.lat(), lng: destLL.lng(), radiusMeters: maxCycleMeters });
+
 
       // draw stations
-      originStations.forEach((s)=> addStationMarker(s.location, true));
-      destStations.forEach((s)=> addStationMarker(s.location, false));
+      // draw stations
+      originStations.forEach((s) => addStationMarker({ lat: s.lat, lng: s.lng }, true));
+      destStations.forEach((s) => addStationMarker({ lat: s.lat, lng: s.lng }, false));
 
       const candidates = [];
       const str = (ll) => `${ll.lat()},${ll.lng()}`;
@@ -316,49 +349,66 @@ function addStationMarker(position, isOriginSide){
       try {
         const bikeOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'BICYCLING' });
         const tBike = adjustCycleDuration(sumDurationREST(bikeOD));
-        const allowBikeOnly = !strictCap || (tBike <= maxCycleMin*60);
-        if (allowBikeOnly) candidates.push({ kind:'bike-only', totalSec:tBike, segments:[{ mode:'BICYCLING', res: bikeOD }] });
+        const allowBikeOnly = !strictCap || (tBike <= maxCycleMin * 60);
+        if (allowBikeOnly) candidates.push({ kind: 'bike-only', totalSec: tBike, segments: [{ mode: 'BICYCLING', res: bikeOD }] });
       } catch (e) { console.warn('Bike-only failed:', e.message); }
 
       // Transit-only
       try {
-        const trOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'TRANSIT', transitModes:['SUBWAY','TRAIN','TRAM','BUS'] });
+        const trOD = await fetchDirections({ origin: str(originLL), destination: str(destLL), mode: 'TRANSIT', transitModes: ['SUBWAY', 'TRAIN', 'TRAM', 'BUS'] });
         if (sumDurationREST(trOD) < Infinity) {
-          candidates.push({ kind:'transit-only', totalSec: sumDurationREST(trOD), segments:[{ mode:'TRANSIT', res: trOD }] });
+          candidates.push({ kind: 'transit-only', totalSec: sumDurationREST(trOD), segments: [{ mode: 'TRANSIT', res: trOD }] });
         }
       } catch (e) { console.warn('Transit-only failed:', e.message); }
 
       // Combos
-      for (const a of originStations){
-        for (const b of destStations){
-          try {
-            const seg1 = await fetchDirections({ origin: str(originLL), destination: `${a.location.lat()},${a.location.lng()}`, mode:'BICYCLING' });
-            const seg2 = await fetchDirections({ origin: `${a.location.lat()},${a.location.lng()}`, destination: `${b.location.lat()},${b.location.lng()}`, mode:'TRANSIT', transitModes:['SUBWAY','TRAIN','TRAM','BUS'] });
-            const seg3 = await fetchDirections({ origin: `${b.location.lat()},${b.location.lng()}`, destination: str(destLL), mode:'BICYCLING' });
-            const t1=adjustCycleDuration(sumDurationREST(seg1)), t2=sumDurationREST(seg2), t3=adjustCycleDuration(sumDurationREST(seg3));
-            if (t1>maxCycleMin*60 || t3>maxCycleMin*60) continue;
-            candidates.push({ kind:'combo', totalSec:t1+t2+t3, parts:{a,b}, segments:[{mode:'BICYCLING',res:seg1},{mode:'TRANSIT',res:seg2},{mode:'BICYCLING',res:seg3}] });
-          } catch (e) { /* skip bad pair */ }
+      // Combos - Smart Heuristic
+      const pairs = [];
+      for (const a of originStations) {
+        for (const b of destStations) {
+          if (a.name === b.name) continue; // Same station
+          let score = 0;
+          // Heuristic: Prefer shared lines (1000pts), penalize by distance
+          const commonLine = a.lines.find(l => b.lines.includes(l));
+          if (commonLine) score += 1000;
+          score -= (a.dist + b.dist);
+          pairs.push({ a, b, score, commonLine });
         }
       }
+      // Top 5 only
+      pairs.sort((x, y) => y.score - x.score);
+      const topPairs = pairs.slice(0, 5);
 
-      if (!candidates.length){
+      for (const p of topPairs) {
+        const { a, b } = p;
+        try {
+          const seg1 = await fetchDirections({ origin: str(originLL), destination: `${a.lat},${a.lng}`, mode: 'BICYCLING' });
+          const seg2 = await fetchDirections({ origin: `${a.lat},${a.lng}`, destination: `${b.lat},${b.lng}`, mode: 'TRANSIT', transitModes: ['SUBWAY', 'TRAIN', 'TRAM', 'BUS'] });
+          const seg3 = await fetchDirections({ origin: `${b.lat},${b.lng}`, destination: str(destLL), mode: 'BICYCLING' });
+          const t1 = adjustCycleDuration(sumDurationREST(seg1)), t2 = sumDurationREST(seg2), t3 = adjustCycleDuration(sumDurationREST(seg3));
+
+          if (t1 > maxCycleMin * 60 || t3 > maxCycleMin * 60) continue;
+          candidates.push({ kind: 'combo', totalSec: t1 + t2 + t3, parts: { a, b }, segments: [{ mode: 'BICYCLING', res: seg1 }, { mode: 'TRANSIT', res: seg2 }, { mode: 'BICYCLING', res: seg3 }] });
+        } catch (e) { /* skip bad pair */ }
+      }
+
+      if (!candidates.length) {
         msg('No routes found. Check billing on your GCP project and that GOOGLE_SERVER_KEY allows Directions & Places.');
         return;
       }
-      candidates.sort((x,y)=>x.totalSec-y.totalSec);
+      candidates.sort((x, y) => x.totalSec - y.totalSec);
       const best = candidates[0];
       const cycleOnly = candidates.find(c => c.kind === 'bike-only');
       renderSolution(best, (cycleOnly && cycleOnly !== best) ? cycleOnly : null);
       msg('');
     }
 
-    function adjustCycleDuration(seconds){
+    function adjustCycleDuration(seconds) {
       if (!Number.isFinite(seconds)) return seconds;
       return Math.round(seconds * BIKE_TIME_MODIFIER);
     }
 
-    function sumDurationREST(json){
+    function sumDurationREST(json) {
       try {
         if (json.status && json.status !== 'OK') return Infinity;
         const legs = json.routes?.[0]?.legs || [];
@@ -369,44 +419,44 @@ function addStationMarker(position, isOriginSide){
       }
     }
 
-    function renderSolution(sol, compareCycle){
-      const summary = el('summary'); summary.innerHTML=''; el('fare').innerHTML='';
-      const fmt = (s)=>{ const m=Math.round(s/60); return m<60? `${m} min` : `${Math.floor(m/60)}h ${m%60}m`; };
+    function renderSolution(sol, compareCycle) {
+      const summary = el('summary'); summary.innerHTML = ''; el('fare').innerHTML = '';
+      const fmt = (s) => { const m = Math.round(s / 60); return m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${m % 60}m`; };
 
       // draw polylines
-      for (const seg of sol.segments){
+      for (const seg of sol.segments) {
         const route = seg.res.routes[0];
         const path = google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
-        const color = seg.mode==='BICYCLING' ? '#10b981' : '#6366f1';
-        const poly = new google.maps.Polyline({ path, strokeColor: color, strokeOpacity:.95, strokeWeight:7, map });
+        const color = seg.mode === 'BICYCLING' ? '#10b981' : '#6366f1';
+        const poly = new google.maps.Polyline({ path, strokeColor: color, strokeOpacity: .95, strokeWeight: 7, map });
         polylines.push(poly);
       }
-      const bounds = new google.maps.LatLngBounds(); polylines.forEach(pl=>pl.getPath().forEach(pt=>bounds.extend(pt))); if (!bounds.isEmpty()) map.fitBounds(bounds,64);
+      const bounds = new google.maps.LatLngBounds(); polylines.forEach(pl => pl.getPath().forEach(pt => bounds.extend(pt))); if (!bounds.isEmpty()) map.fitBounds(bounds, 64);
 
       // title
-      const title = document.createElement('div'); title.className='mb-2'; title.innerHTML = `<div class="text-base font-semibold text-slate-800">${labelForKind(sol)}</div><div class="text-sm text-slate-700">Total time: <span class="font-semibold">${fmt(sol.totalSec)}</span></div>`;
+      const title = document.createElement('div'); title.className = 'mb-2'; title.innerHTML = `<div class="text-base font-semibold text-slate-800">${labelForKind(sol)}</div><div class="text-sm text-slate-700">Total time: <span class="font-semibold">${fmt(sol.totalSec)}</span></div>`;
       summary.appendChild(title);
 
-      const list = document.createElement('ol'); list.className='list-decimal pl-5 space-y-3';
-      if (sol.kind==='combo'){
-        const li1=document.createElement('li'); li1.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[0].res)))}</div><div class="text-xs text-slate-600">to <b>${sol.parts.a.name}</b></div>`; list.appendChild(li1);
-        const li2=document.createElement('li'); li2.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sumDurationREST(sol.segments[1].res))}</div>`; list.appendChild(li2);
-        const li3=document.createElement('li'); li3.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[2].res)))}</div><div class="text-xs text-slate-600">from <b>${sol.parts.b.name}</b> to destination</div>`; list.appendChild(li3);
-      } else if (sol.kind==='bike-only'){
-        const li=document.createElement('li'); li.innerHTML = `<div class="font-medium">Cycle — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
-      } else if (sol.kind==='transit-only'){
-        const li=document.createElement('li'); li.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
+      const list = document.createElement('ol'); list.className = 'list-decimal pl-5 space-y-3';
+      if (sol.kind === 'combo') {
+        const li1 = document.createElement('li'); li1.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[0].res)))}</div><div class="text-xs text-slate-600">to <b>${sol.parts.a.name}</b></div>`; list.appendChild(li1);
+        const li2 = document.createElement('li'); li2.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sumDurationREST(sol.segments[1].res))}</div>`; list.appendChild(li2);
+        const li3 = document.createElement('li'); li3.innerHTML = `<div class="font-medium">Cycle — ${fmt(adjustCycleDuration(sumDurationREST(sol.segments[2].res)))}</div><div class="text-xs text-slate-600">from <b>${sol.parts.b.name}</b> to destination</div>`; list.appendChild(li3);
+      } else if (sol.kind === 'bike-only') {
+        const li = document.createElement('li'); li.innerHTML = `<div class="font-medium">Cycle — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
+      } else if (sol.kind === 'transit-only') {
+        const li = document.createElement('li'); li.innerHTML = `<div class="font-medium">TfL Transit — ${fmt(sol.totalSec)}</div>`; list.appendChild(li);
       }
       summary.appendChild(list);
 
       // transit details + transfers + fare
-      const transitDetails=[]; const transfers=[]; let lastLine=null, lastArrStop=null; let shownFareText=null;
-      for (const seg of sol.segments){
-        if (seg.mode==='BICYCLING') continue;
+      const transitDetails = []; const transfers = []; let lastLine = null, lastArrStop = null; let shownFareText = null;
+      for (const seg of sol.segments) {
+        if (seg.mode === 'BICYCLING') continue;
         const route = seg.res.routes[0];
         if (!shownFareText && route.fare?.text) shownFareText = route.fare.text;
-        for (const leg of route.legs){
-          for (const step of leg.steps){
+        for (const leg of route.legs) {
+          for (const step of leg.steps) {
             const td = step.transit_details; if (!td) continue;
             const vehicle = td.line?.vehicle?.type || '';
             const rawLine = td.line?.short_name || td.line?.name || vehicle || 'Transit';
@@ -414,45 +464,45 @@ function addStationMarker(position, isOriginSide){
             const color = LINE_COLOURS[lineName] || '#334155';
             const dep = td.departure_stop?.name || ''; const arr = td.arrival_stop?.name || '';
             const dir = td.headsign ? `towards ${td.headsign}` : '';
-            const stops = (typeof td.num_stops==='number') ? ` • ${td.num_stops} stops` : '';
-            if (lastLine && lastLine!==lineName && lastArrStop){ transfers.push({ at:lastArrStop, from:lastLine, to:lineName }); }
-            lastLine=lineName; lastArrStop=arr||dep||lastArrStop;
-            transitDetails.push({ html: `${badge(lineName,color)} <b>${dep}</b> → <b>${arr}</b> <span class='text-slate-600'>${dir}</span>${stops}` });
+            const stops = (typeof td.num_stops === 'number') ? ` • ${td.num_stops} stops` : '';
+            if (lastLine && lastLine !== lineName && lastArrStop) { transfers.push({ at: lastArrStop, from: lastLine, to: lineName }); }
+            lastLine = lineName; lastArrStop = arr || dep || lastArrStop;
+            transitDetails.push({ html: `${badge(lineName, color)} <b>${dep}</b> → <b>${arr}</b> <span class='text-slate-600'>${dir}</span>${stops}` });
           }
         }
       }
 
-      if (shownFareText){ el('fare').innerHTML = `<span class="chip">💷 ${shownFareText}</span>`; }
+      if (shownFareText) { el('fare').innerHTML = `<span class="chip">💷 ${shownFareText}</span>`; }
 
-      if (transitDetails.length){
-        const block=document.createElement('div'); block.className='mt-3 p-3 rounded-[1.25rem] bg-white/70 border border-white/80';
-        const t=document.createElement('div'); t.className='text-sm font-semibold text-slate-800'; t.textContent='Detailed TfL instructions'; block.appendChild(t);
-        const ul=document.createElement('ul'); ul.className='text-sm text-slate-800 list-disc pl-5 space-y-1 mt-1';
-        transitDetails.forEach(td=>{ const li=document.createElement('li'); li.innerHTML=td.html; ul.appendChild(li); });
+      if (transitDetails.length) {
+        const block = document.createElement('div'); block.className = 'mt-3 p-3 rounded-[1.25rem] bg-white/70 border border-white/80';
+        const t = document.createElement('div'); t.className = 'text-sm font-semibold text-slate-800'; t.textContent = 'Detailed TfL instructions'; block.appendChild(t);
+        const ul = document.createElement('ul'); ul.className = 'text-sm text-slate-800 list-disc pl-5 space-y-1 mt-1';
+        transitDetails.forEach(td => { const li = document.createElement('li'); li.innerHTML = td.html; ul.appendChild(li); });
         block.appendChild(ul);
-        if (transfers.length){
-          const row=document.createElement('div'); row.className='mt-3 flex flex-wrap gap-2 items-center';
-          row.innerHTML = `<span class="text-xs font-semibold text-slate-700">Transfers:</span> ` + transfers.map(tb => `${badge(tb.from, LINE_COLOURS[tb.from]||'#334155')} → ${badge(tb.to, LINE_COLOURS[tb.to]||'#334155')} <span class="text-slate-600">@ ${tb.at}</span>`).join(' ');
+        if (transfers.length) {
+          const row = document.createElement('div'); row.className = 'mt-3 flex flex-wrap gap-2 items-center';
+          row.innerHTML = `<span class="text-xs font-semibold text-slate-700">Transfers:</span> ` + transfers.map(tb => `${badge(tb.from, LINE_COLOURS[tb.from] || '#334155')} → ${badge(tb.to, LINE_COLOURS[tb.to] || '#334155')} <span class="text-slate-600">@ ${tb.at}</span>`).join(' ');
           block.appendChild(row);
         }
         summary.appendChild(block);
       }
 
-      if (compareCycle && compareCycle.kind === 'bike-only' && sol.kind !== 'bike-only'){
-        const block=document.createElement('div'); block.className='mt-4 p-4 rounded-[1.25rem] bg-white/70 border border-white/80';
-        const head=document.createElement('div'); head.className='text-sm font-semibold text-slate-800';
-        head.textContent='Cycle-only comparison'; block.appendChild(head);
+      if (compareCycle && compareCycle.kind === 'bike-only' && sol.kind !== 'bike-only') {
+        const block = document.createElement('div'); block.className = 'mt-4 p-4 rounded-[1.25rem] bg-white/70 border border-white/80';
+        const head = document.createElement('div'); head.className = 'text-sm font-semibold text-slate-800';
+        head.textContent = 'Cycle-only comparison'; block.appendChild(head);
 
-        const total=document.createElement('div'); total.className='text-sm text-slate-700 mt-1';
+        const total = document.createElement('div'); total.className = 'text-sm text-slate-700 mt-1';
         total.innerHTML = `Total time: <span class="font-semibold">${fmt(compareCycle.totalSec)}</span>`;
         block.appendChild(total);
 
         const diffSec = compareCycle.totalSec - sol.totalSec;
-        const diffRow=document.createElement('div'); diffRow.className='text-xs text-slate-600 mt-1';
-        const diffLabel = diffSec>0 ? `+${fmt(diffSec)} slower than best option` : diffSec<0 ? `-${fmt(-diffSec)} faster than best option` : 'Matches best option time';
+        const diffRow = document.createElement('div'); diffRow.className = 'text-xs text-slate-600 mt-1';
+        const diffLabel = diffSec > 0 ? `+${fmt(diffSec)} slower than best option` : diffSec < 0 ? `-${fmt(-diffSec)} faster than best option` : 'Matches best option time';
         diffRow.textContent = diffLabel; block.appendChild(diffRow);
 
-        const detail=document.createElement('div'); detail.className='text-sm text-slate-800 mt-2';
+        const detail = document.createElement('div'); detail.className = 'text-sm text-slate-800 mt-2';
         detail.innerHTML = `<span class="font-medium">Cycle</span> — ${fmt(adjustCycleDuration(sumDurationREST(compareCycle.segments[0].res)))}`;
         block.appendChild(detail);
 
@@ -460,8 +510,8 @@ function addStationMarker(position, isOriginSide){
       }
     }
 
-    function normaliseLineName(raw, vehicle){
-      const r=String(raw||'').trim();
+    function normaliseLineName(raw, vehicle) {
+      const r = String(raw || '').trim();
       if (/overground/i.test(r)) return 'London Overground';
       if (/elizabeth/i.test(r)) return 'Elizabeth line';
       if (/dlr/i.test(r)) return 'DLR';
@@ -477,11 +527,11 @@ function addStationMarker(position, isOriginSide){
       if (/victoria/i.test(r)) return 'Victoria';
       if (/waterloo/i.test(r)) return 'Waterloo & City';
       if (/tram/i.test(r)) return 'Tram';
-      if (/bus/i.test(vehicle||r)) return 'Bus';
+      if (/bus/i.test(vehicle || r)) return 'Bus';
       return r;
     }
-    function badge(label, color){ return `<span class="chip" style="border-color:${color}; background:${color}1a; color:${color}">${label}</span>`; }
-    function labelForKind(sol){
+    function badge(label, color) { return `<span class="chip" style="border-color:${color}; background:${color}1a; color:${color}">${label}</span>`; }
+    function labelForKind(sol) {
       switch (sol?.kind) {
         case 'combo': {
           const from = sol?.parts?.a?.name || 'origin';
@@ -498,19 +548,19 @@ function addStationMarker(position, isOriginSide){
     }
 
     // ===== Optional tiny debug badge (remove if you like) =====
-    (async function diag(){
+    (async function diag() {
       const box = document.createElement('div');
-      box.style.position='fixed'; box.style.right='8px'; box.style.bottom='8px';
-      box.style.background='rgba(255,255,255,.8)'; box.style.border='1px solid rgba(148,163,184,.35)';
-      box.style.borderRadius='12px'; box.style.padding='6px 8px'; box.style.font='12px/1.2 Inter, sans-serif'; box.style.zIndex=9999;
-      box.innerHTML='Diag: <span id="d-maps">Maps?</span> • <span id="d-env">Env?</span> • <span id="d-pl">Places?</span> • <span id="d-dir">Dir?</span>';
+      box.style.position = 'fixed'; box.style.right = '8px'; box.style.bottom = '8px';
+      box.style.background = 'rgba(255,255,255,.8)'; box.style.border = '1px solid rgba(148,163,184,.35)';
+      box.style.borderRadius = '12px'; box.style.padding = '6px 8px'; box.style.font = '12px/1.2 Inter, sans-serif'; box.style.zIndex = 9999;
+      box.innerHTML = 'Diag: <span id="d-maps">Maps?</span> • <span id="d-env">Env?</span> • <span id="d-pl">Places?</span> • <span id="d-dir">Dir?</span>';
       document.body.appendChild(box);
-      const ok = (id, good, txt) => { const el=document.getElementById(id); el.textContent=txt; el.style.color=good?'#16a34a':'#dc2626'; };
-      try { const env = await fetch('/api/env').then(r=>r.json()); ok('d-env', !!env.mapsJsKey, env.mapsJsKey ? 'Env OK' : 'Env ✖'); } catch { ok('d-env', false, 'Env ✖'); }
-      ok('d-maps', !!(window.google && window.google.maps), (window.google && window.google.maps)?'Maps OK':'Maps ✖');
-      try { const pl = await fetch('/api/places-nearby?lat=51.5&lng=-0.12&radius=500&type=subway_station').then(r=>r.json()); ok('d-pl', pl.status==='OK'||pl.status==='ZERO_RESULTS', 'Places ' + (pl.status||'✖')); } catch { ok('d-pl', false, 'Places ✖'); }
-      try { const dr = await fetch('/api/directions?origin=51.5074,-0.1278&destination=51.5033,-0.1196&mode=TRANSIT&transitModes=subway|train|tram|bus').then(r=>r.json()); ok('d-dir', dr.status==='OK'||dr.status==='ZERO_RESULTS', 'Dir ' + (dr.status||'✖')); } catch { ok('d-dir', false, 'Dir ✖'); }
-      setTimeout(()=>box.remove(), 8000);
+      const ok = (id, good, txt) => { const el = document.getElementById(id); el.textContent = txt; el.style.color = good ? '#16a34a' : '#dc2626'; };
+      try { const env = await fetch('/api/env').then(r => r.json()); ok('d-env', !!env.mapsJsKey, env.mapsJsKey ? 'Env OK' : 'Env ✖'); } catch { ok('d-env', false, 'Env ✖'); }
+      ok('d-maps', !!(window.google && window.google.maps), (window.google && window.google.maps) ? 'Maps OK' : 'Maps ✖');
+      try { const pl = await fetch('/api/places-nearby?lat=51.5&lng=-0.12&radius=500&type=subway_station').then(r => r.json()); ok('d-pl', pl.status === 'OK' || pl.status === 'ZERO_RESULTS', 'Places ' + (pl.status || '✖')); } catch { ok('d-pl', false, 'Places ✖'); }
+      try { const dr = await fetch('/api/directions?origin=51.5074,-0.1278&destination=51.5033,-0.1196&mode=TRANSIT&transitModes=subway|train|tram|bus').then(r => r.json()); ok('d-dir', dr.status === 'OK' || dr.status === 'ZERO_RESULTS', 'Dir ' + (dr.status || '✖')); } catch { ok('d-dir', false, 'Dir ✖'); }
+      setTimeout(() => box.remove(), 8000);
     })();
   </script>
 
@@ -518,9 +568,10 @@ function addStationMarker(position, isOriginSide){
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+        navigator.serviceWorker.register('/sw.js').catch(() => { });
       });
     }
   </script>
 </body>
+
 </html>

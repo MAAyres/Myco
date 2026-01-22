@@ -430,7 +430,7 @@
       el('planBtn').addEventListener('click', planBestRoute);
       el('settingsBtn').addEventListener('click', () => {
         loadSettingsInputs();
-        document.getElementById('settingsModal').showModal();
+        toggleSettings(true);
       });
 
       // Settings Autocomplete
@@ -445,7 +445,7 @@
           work: workInput.value
         };
         localStorage.setItem('myco_places', JSON.stringify(places));
-        document.getElementById('settingsModal').close();
+        toggleSettings(false);
       });
 
       // Check URL params
@@ -483,10 +483,15 @@
       } else {
         // Open settings if missing
         loadSettingsInputs();
-        document.getElementById('settingsModal').showModal();
+        toggleSettings(true);
         // Focus the right input
         setTimeout(() => el(key === 'home' ? 'setHome' : 'setWork').focus(), 100);
       }
+    }
+
+    function toggleSettings(show) {
+      const m = el('settingsModal');
+      if (show) m.classList.remove('hidden'); else m.classList.add('hidden');
     }
 
     // ===== Weather (OpenMeteo) =====
@@ -907,29 +912,35 @@
   </script>
 
   <!-- Settings Modal -->
-  <dialog id="settingsModal"
-    class="p-0 rounded-2xl shadow-2xl backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm bg-transparent open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in">
-    <div class="w-[90vw] max-w-md bg-white p-6 rounded-2xl border border-white/60">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-slate-800">Settings</h2>
-        <button onclick="document.getElementById('settingsModal').close()"
-          class="p-1 rounded-full hover:bg-slate-100 text-slate-500">✕</button>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <label class="section-title">Home Address</label>
-          <input id="setHome" class="field" placeholder="Search address..." />
+  <!-- Settings Modal (Div based to avoid dialog top-layer z-index issues) -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onclick="toggleSettings(false)">
+    </div>
+    <!-- Content -->
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+      <div
+        class="pointer-events-auto w-full max-w-md bg-white p-6 rounded-2xl shadow-2xl border border-white/60 animate-in fade-in zoom-in-95 duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-slate-800">Settings</h2>
+          <button onclick="toggleSettings(false)" class="p-1 rounded-full hover:bg-slate-100 text-slate-500">✕</button>
         </div>
-        <div>
-          <label class="section-title">Work Address</label>
-          <input id="setWork" class="field" placeholder="Search address..." />
-        </div>
-        <div class="pt-2 flex justify-end">
-          <button id="saveSettings" class="btn btn-primary w-full">Save & Close</button>
+        <div class="space-y-4">
+          <div>
+            <label class="section-title">Home Address</label>
+            <input id="setHome" class="field" placeholder="Search address..." />
+          </div>
+          <div>
+            <label class="section-title">Work Address</label>
+            <input id="setWork" class="field" placeholder="Search address..." />
+          </div>
+          <div class="pt-2 flex justify-end">
+            <button id="saveSettings" class="btn btn-primary w-full">Save & Close</button>
+          </div>
         </div>
       </div>
     </div>
-  </dialog>
+  </div>
 
   <!-- PWA: register service worker -->
   <script>
